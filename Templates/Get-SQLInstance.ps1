@@ -1,4 +1,6 @@
-﻿Param(
+﻿#verze 1.1
+
+Param(
 
     $default = 'false'
 )
@@ -11,7 +13,7 @@ ForEach ($objService In $objSQLInstance) {
     If ($default -eq 'true')
     {
         If ($NameInstance -eq 'MSSQLSERVER') {
-            $Return = '{{#SQLINSTANCE}: "SQLServer"}'
+            $Return = '{"{#SQLINSTANCE}": "SQLServer"}}'
         }
     } Else {
         If ($NameInstance -ne 'MSSQLSERVER') {
