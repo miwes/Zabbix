@@ -1,0 +1,1 @@
+Get-Counter -Counter '\SQLServer:Databases(*)\Data File(s) Size (KB)' | Select-Object -ExpandProperty CounterSamples | Select-Object InstanceName

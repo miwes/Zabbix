@@ -1,0 +1,17 @@
+Uprava Appliance Zabbix pro pristup k DB
+----------------------------------------
+1. Upravit /etc/mysql/my.cnf - pro bind na adresu 0.0.0.0 z 127.0.0.1
+2. Pridat prava uzivatele READ do MySQL
+	-- reset hesla MySQL
+		-vypnout mysql /etc/init.d/mysql stop
+		-zapnout s sudo mysqld_safe --skip-grant-tables --skip-networking &
+		-pripojit se: mysql -u root
+			FLUSH PRIVILEGES;
+			SET PASSWORD FOR 'root'@'localhost' = PASSWORD('new_password');
+		-vypnout mysql a zapnout jako sluzbu
+	-- pridani Read uzivatele
+		CREATE USER 'read'@'%' IDENTIFIED BY 'password';
+		GRANT SELECT ON zabbix.* TO 'read'@'%';
+	
+	
+	
