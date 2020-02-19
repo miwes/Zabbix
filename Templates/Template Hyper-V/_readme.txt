@@ -1,0 +1,1 @@
+Nutne povolit unsafe v zabbix configu

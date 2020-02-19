@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-01-27T09:25:49Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template WSUS server</template>
+            <name>Template WSUS server</name>
+            <description>Version 1.0&#13;
+&#13;
+Requirements:&#13;
+ - Microsoft ODBC Driver - https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver15&#13;
+ - Database user &amp; password (macros)</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>WSUS</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>WSUS Computers</name>
+                    <type>ODBC</type>
+                    <key>db.odbc.discovery[HotfixCount,WSUSDB]</key>
+                    <delay>1h</delay>
+                    <params>SELECT &#13;
+	DISTINCT [FullDomainName] as [HostName]&#13;
+FROM tbUpdateStatusPerComputer INNER JOIN tbComputerTarget ON tbUpdateStatusPerComputer.TargetID = tbComputerTarget.TargetID</params>
+                    <username>{$DBUSER}</username>
+                    <password>{$DBPASSWD}</password>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#HOSTNAME}</name>
+                            <type>ODBC</type>
+                            <key>db.odbc.select[{#HOSTNAME},WSUSDB]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <units>Hotfixes</units>
+                            <params>SELECT &#13;
+	dbo.tbComputerSummaryForMicrosoftUpdates.NotInstalled + dbo.tbComputerSummaryForMicrosoftUpdates.Downloaded&#13;
+FROM dbo.tbComputerSummaryForMicrosoftUpdates &#13;
+INNER JOIN  dbo.tbComputerTarget ON dbo.tbComputerSummaryForMicrosoftUpdates.TargetID = dbo.tbComputerTarget.TargetID&#13;
+WHERE [FullDomainName] = '{#HOSTNAME}'</params>
+                            <username>{$DBUSER}</username>
+                            <password>{$DBPASSWD}</password>
+                            <applications>
+                                <application>
+                                    <name>WSUS</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$MAXHOTFIXS}</expression>
+                                    <name>Need to update more than: {ITEM.LASTVALUE1} - {#HOSTNAME}</name>
+                                    <opdata>Current: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>INFO</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>WSUS Inactive day(s) - {#HOSTNAME}</name>
+                            <type>ODBC</type>
+                            <key>db.odbc.select[{#HOSTNAME}LastReportedStatusTime,WSUSDB]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <units>Days</units>
+                            <params>SELECT &#13;
+       DISTINCT DATEDIFF(day,LastReportedStatusTime,GETDATE()) AS InactiveDay&#13;
+FROM tbUpdateStatusPerComputer INNER JOIN tbComputerTarget ON tbUpdateStatusPerComputer.TargetID = tbComputerTarget.TargetID&#13;
+WHERE [FullDomainName] = '{#HOSTNAME}'</params>
+                            <username>{$DBUSER}</username>
+                            <password>{$DBPASSWD}</password>
+                            <applications>
+                                <application>
+                                    <name>WSUS</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$INACTIVEDAYS}</expression>
+                                    <name>Inactive: {ITEM.LASTVALUE} - {#HOSTNAME}</name>
+                                    <opdata>Current: {ITEM.LASTVALUE}</opdata>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$DBPASSWD}</macro>
+                </macro>
+                <macro>
+                    <macro>{$DBUSER}</macro>
+                </macro>
+                <macro>
+                    <macro>{$INACTIVEDAYS}</macro>
+                    <value>20</value>
+                    <description>In active days</description>
+                </macro>
+                <macro>
+                    <macro>{$MAXHOTFIXS}</macro>
+                    <value>20</value>
+                    <description>Threshold updates</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>

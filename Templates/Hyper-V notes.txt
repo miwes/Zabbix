@@ -1,5 +1,0 @@
-Change in zabbix_agentd.win.conf
---------------------------------
-
-UnsafeUserParameters=1
-UserParameter=counter.instance[*], powershell -NoProfile -ExecutionPolicy Bypass -file "c:\Program Files\Zabbix\UserScripts\Get-Instance.ps1" "$1"

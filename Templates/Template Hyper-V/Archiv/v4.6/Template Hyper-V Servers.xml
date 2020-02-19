@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.6</version>
+    <date>2020-01-24T08:42:58Z</date>
+    <groups>
+        <group>
+            <name>Templates/Virtualization</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Hyper-V Servers</template>
+            <name>Template Hyper-V Servers</name>
+            <description>Version 4.6</description>
+            <groups>
+                <group>
+                    <name>Templates/Virtualization</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Hyper-V</name>
+                </application>
+                <application>
+                    <name>Hyper-V CSV</name>
+                </application>
+                <application>
+                    <name>Hyper-V VM</name>
+                </application>
+                <application>
+                    <name>Hyper-V VM CPU</name>
+                </application>
+                <application>
+                    <name>Hyper-V VM Network</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Hyper-V Hypervisor Logical Processor(_Total)</name>
+                    <key>perf_counter[&quot;\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time&quot;]</key>
+                    <delay>30</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <description>https://msdn.microsoft.com/en-us/library/cc768535%28v=bts.10%29.aspx?f=255&amp;MSPPError=-2147217396</description>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(3600)}&gt;80</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{min(600)}&lt;80</recovery_expression>
+                            <name>Host Parent Partition CPU Utilization</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{min(3600)}&gt;90</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{min(600)}&lt;90</recovery_expression>
+                            <name>Host Parent Partition CPU Utilization</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Hyper-V Hypervisor Virtual Processor Guest (Total)</name>
+                    <key>perf_counter[&quot;\Hyper-V Hypervisor Virtual Processor(_Total)\% Guest Run Time&quot;]</key>
+                    <delay>30</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>Hyper-V Hypervisor Virtual Processor Hypervisor(Total)</name>
+                    <key>perf_counter[&quot;\Hyper-V Hypervisor Virtual Processor(_Total)\% Hypervisor Run Time&quot;]</key>
+                    <delay>30</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>Hyper-V Number of Logical CPUs</name>
+                    <key>perf_counter[\Hyper-V Hypervisor\Logical Processors]</key>
+                    <delay>30</delay>
+                    <units>Core</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>Hyper-V Number of Virtual CPUs</name>
+                    <key>perf_counter[\Hyper-V Hypervisor\Virtual Processors]</key>
+                    <delay>30</delay>
+                    <units>Core</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>Hyper-V Virtual Machine Health - Critical</name>
+                    <key>perf_counter[\Hyper-V Virtual Machine Health Summary\Health Critical]</key>
+                    <delay>30</delay>
+                    <units>VM</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                    <triggers>
+                        <trigger>
+                            <expression>{prev()}&gt;0</expression>
+                            <name>Hyper-V VM Critical state</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Hyper-V Virtual Machine Health - OK</name>
+                    <key>perf_counter[\Hyper-V Virtual Machine Health Summary\Health Ok]</key>
+                    <delay>30</delay>
+                    <units>VM</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Hyper-V CSV</name>
+                    <key>counter.instance[\Cluster CSV File System(*)\Write Latency]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>CSV Read Latency {#INSTANCE}</name>
+                            <key>perf_counter[\Cluster CSV File System({#INSTANCE})\Read Latency]</key>
+                            <delay>30</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V CSV</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>CSV Write Latency {#INSTANCE}</name>
+                            <key>perf_counter[\Cluster CSV File System({#INSTANCE})\Write Latency]</key>
+                            <delay>30</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V CSV</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                        </item_prototype>
+                    </item_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Hyper-V VM CPU</name>
+                    <key>counter.instance[\Hyper-V Hypervisor Virtual Processor(*)\% Total Run Time]</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#INSTANCE}</macro>
+                                <value>[^_Total]</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Hyper-V VM CPU - {#INSTANCE}</name>
+                            <key>perf_counter[\Hyper-V Hypervisor Virtual Processor({#INSTANCE})\% Total Run Time]</key>
+                            <delay>30</delay>
+                            <value_type>FLOAT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V VM CPU</name>
+                                </application>
+                            </applications>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Virtual Machine</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{avg(60m)}&gt;90</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{avg(10m)}&lt;80</recovery_expression>
+                                    <name>High VM CPU Load &gt; 90% - {#INSTANCE}</name>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Hyper-V VM Network</name>
+                    <key>counter.instance[\Hyper-V Virtual Network Adapter(*)\Bytes/sec]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Hyper-V VM Network - {#INSTANCE}</name>
+                            <key>perf_counter[\Hyper-V Virtual Network Adapter({#INSTANCE})\Bytes/sec]</key>
+                            <delay>30</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>Bytes</units>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V VM Network</name>
+                                </application>
+                            </applications>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Virtual Machine</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{avg(30m)}&gt;100M</expression>
+                                    <name>High VM Net &gt; 100MB - {#INSTANCE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Hyper-V VM</name>
+                    <key>counter.instance[\Hyper-V VM VID Partition(*)\Physical Pages Allocated]</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#INSTANCE}</macro>
+                                <value>[^_Total]</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>1d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Hyper-V {#INSTANCE} snapshot</name>
+                            <key>vm.snapshot[{#INSTANCE}]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V VM</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{regexp(\b[0]\b,#48)}=0</expression>
+                                    <name>Snapshot on {#INSTANCE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Hyper-V CSV Freespace</name>
+                    <key>hyperv.csv</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#NAME} freespace</name>
+                            <key>hyperv.csv[{#NAME}]</key>
+                            <delay>5m</delay>
+                            <units>B</units>
+                            <applications>
+                                <application>
+                                    <name>Hyper-V CSV</name>
+                                </application>
+                            </applications>
+                            <request_method>POST</request_method>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$CSVFREESPACE}</expression>
+                                    <name>Free disk space is less than {$CSVFREESPACE} on volume {#NAME}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Freespace CSV</name>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template Hyper-V Servers</host>
+                                        <key>hyperv.csv[{#NAME}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <request_method>POST</request_method>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CSVFREESPACE}</macro>
+                    <value>500000000000</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Hyper-V CPU</name>
+            <graph_items>
+                <graph_item>
+                    <drawtype>GRADIENT_LINE</drawtype>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template Hyper-V Servers</host>
+                        <key>perf_counter[&quot;\Hyper-V Hypervisor Virtual Processor(_Total)\% Guest Run Time&quot;]</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>0000DD</color>
+                    <item>
+                        <host>Template Hyper-V Servers</host>
+                        <key>perf_counter[&quot;\Hyper-V Hypervisor Virtual Processor(_Total)\% Hypervisor Run Time&quot;]</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+</zabbix_export>
