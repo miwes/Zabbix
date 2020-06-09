@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>4.4</version>
-    <date>2020-02-03T07:36:16Z</date>
+    <date>2020-05-04T10:26:10Z</date>
     <groups>
         <group>
             <name>Templates/Virtualization</name>
@@ -15,9 +15,10 @@
 - Zabbix Server 4.4&#13;
 - Zabbix Agent 4.4&#13;
 &#13;
-Version 5.0.2&#13;
+Version 5.1&#13;
  - discovery over WMI&#13;
- - no external scripts</description>
+ - no external scripts&#13;
+ - add Total vs Usage memory per host group</description>
             <groups>
                 <group>
                     <name>Templates/Virtualization</name>
@@ -44,6 +45,30 @@ Version 5.0.2&#13;
                 </application>
             </applications>
             <items>
+                <item>
+                    <name>Total memory over group {$HYPERVGROUP}</name>
+                    <type>AGGREGATE</type>
+                    <key>grpsum[&quot;{$HYPERVGROUP}&quot;,&quot;vm.memory.size[total]&quot;,&quot;last&quot;,&quot;0&quot;]</key>
+                    <delay>5m</delay>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V VM Memory</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Usage memory over group {$HYPERVGROUP}</name>
+                    <type>AGGREGATE</type>
+                    <key>grpsum[&quot;{$HYPERVGROUP}&quot;,&quot;vm.memory.size[used]&quot;,&quot;last&quot;,&quot;0&quot;]</key>
+                    <delay>5m</delay>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>Hyper-V VM Memory</name>
+                        </application>
+                    </applications>
+                </item>
                 <item>
                     <name>Hyper-V Hypervisor Logical Processor(_Total)</name>
                     <key>perf_counter[&quot;\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time&quot;]</key>
@@ -366,7 +391,7 @@ Version 5.0.2&#13;
                             <trigger_prototypes>
                                 <trigger_prototype>
                                     <expression>{avg(60m)}&gt;{$VM_CPU_TRESHOLD}</expression>
-                                    <name>High VM CPU Load &gt; {$VM_CPU_TRESHOLD}% - {#INSTANCE}</name>
+                                    <name>High VM CPU usage - {#INSTANCE} (over {$VM_CPU_TRESHOLD}% avg 60m)</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
@@ -515,6 +540,11 @@ Version 5.0.2&#13;
             </discovery_rules>
             <macros>
                 <macro>
+                    <macro>{$HYPERVGROUP}</macro>
+                    <value>Hypervisors</value>
+                    <description>Host group in Zabbix</description>
+                </macro>
+                <macro>
                     <macro>{$VM_CPU_TRESHOLD}</macro>
                     <value>90</value>
                     <description>Usage CPU in %</description>
@@ -550,6 +580,33 @@ Version 5.0.2&#13;
                     <item>
                         <host>Template Hyper-V Servers</host>
                         <key>perf_counter[&quot;\Hyper-V Hypervisor Virtual Processor(_Total)\% Hypervisor Run Time&quot;]</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Total vs Usage memory in group {$HYPERVGROUP}</name>
+            <yaxismax>0.0000</yaxismax>
+            <show_work_period>NO</show_work_period>
+            <show_triggers>NO</show_triggers>
+            <type>PIE</type>
+            <graph_items>
+                <graph_item>
+                    <color>1A7C11</color>
+                    <calc_fnc>LAST</calc_fnc>
+                    <type>GRAPH_SUM</type>
+                    <item>
+                        <host>Template Hyper-V Servers</host>
+                        <key>grpsum[&quot;{$HYPERVGROUP}&quot;,&quot;vm.memory.size[total]&quot;,&quot;last&quot;,&quot;0&quot;]</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>F63100</color>
+                    <calc_fnc>LAST</calc_fnc>
+                    <item>
+                        <host>Template Hyper-V Servers</host>
+                        <key>grpsum[&quot;{$HYPERVGROUP}&quot;,&quot;vm.memory.size[used]&quot;,&quot;last&quot;,&quot;0&quot;]</key>
                     </item>
                 </graph_item>
             </graph_items>
