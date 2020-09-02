@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-08-18T09:03:57Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Windows restart audit</template>
+            <name>Template Windows restart audit</name>
+            <groups>
+                <group>
+                    <name>Templates/Operating systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Restart</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Eventid 1074</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>eventlog[System,,,,1074,,]</key>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <applications>
+                        <application>
+                            <name>Restart</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Restart description</name>
+                    <type>DEPENDENT</type>
+                    <key>restart.description</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>Restart</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(user )(.*)( for)(.*)(reason: )(.*)((.|\n)*)(Comment:.*)()
+User: \2, Reason: \6, \9</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[System,,,,1074,,]</key>
+                    </master_item>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>

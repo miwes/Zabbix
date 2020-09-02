@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-07-15T05:46:32Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Certificate</template>
+            <name>Template Certificate</name>
+            <description>Author: Michal Weis&#13;
+Version: 1.0</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Certificate</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery certificates</name>
+                    <type>EXTERNAL</type>
+                    <key>check-certificate.sh[&quot;{$URL}&quot;,geturl]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Certificate {#URL} will expire</name>
+                            <type>EXTERNAL</type>
+                            <key>check-certificate.sh[{#URL}]</key>
+                            <delay>1d</delay>
+                            <units>day</units>
+                            <applications>
+                                <application>
+                                    <name>Certificate</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$ERR_EXPIRED_DAYS}</expression>
+                                    <name>Certificate {#URL} will expire &lt; {$ERR_EXPIRED_DAYS} days</name>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$WARN_EXPIRED_DAYS}</expression>
+                                    <name>Certificate {#URL} will expire &lt; {$WARN_EXPIRED_DAYS} days</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Certificate {#URL} will expire &lt; {$ERR_EXPIRED_DAYS} days</name>
+                                            <expression>{Template Certificate:check-certificate.sh[{#URL}].last()}&lt;{$ERR_EXPIRED_DAYS}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$ERR_EXPIRED_DAYS}</macro>
+                    <value>20</value>
+                    <description>Threshold error</description>
+                </macro>
+                <macro>
+                    <macro>{$URL}</macro>
+                    <value>rds.aclab.cz;google.cz;idnes.cz</value>
+                    <description>URL with semicolon, example google.cz;seznam.cz</description>
+                </macro>
+                <macro>
+                    <macro>{$WARN_EXPIRED_DAYS}</macro>
+                    <value>30</value>
+                    <description>Threshold warning</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>

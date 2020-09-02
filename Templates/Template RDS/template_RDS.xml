@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-07-15T06:09:20Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template RDS</template>
+            <name>Template RDS</name>
+            <description>Author: Michal Weis&#13;
+Version : 1.0</description>
+            <groups>
+                <group>
+                    <name>Templates/Operating systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>RDS sessions</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Active sessions</name>
+                    <key>perf_counter_en[&quot;\Terminal Services\Active Sessions&quot;]</key>
+                    <units>User</units>
+                    <applications>
+                        <application>
+                            <name>RDS sessions</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>Inactive sessions</name>
+                    <key>perf_counter_en[&quot;\Terminal Services\Inactive Sessions&quot;]</key>
+                    <units>User</units>
+                    <applications>
+                        <application>
+                            <name>RDS sessions</name>
+                        </application>
+                    </applications>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>

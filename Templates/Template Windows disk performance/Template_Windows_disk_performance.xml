@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-07-08T14:39:45Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template OS Windows disk performance</template>
+            <name>Template OS Windows disk performance</name>
+            <description>Michal Weis&#13;
+v1.0 - release</description>
+            <groups>
+                <group>
+                    <name>Templates/Operating systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Storage performance</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Physical disks discovery</name>
+                    <key>wmi.getall[root\cimv2,SELECT name FROM win32_perfrawdata_perfdisk_physicaldisk WHERE name &lt;&gt; '_Total']</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#INSTANCE} Avg. Disk sec/Read</name>
+                            <key>perf_counter_en[&quot;\PhysicalDisk({#INSTANCE})\Avg. Disk sec/Read&quot;]</key>
+                            <delay>15s</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Avg. Disk sec/Read is the average time, in seconds, of a read of data from the disk.&#13;
+&#13;
+Treshold &lt; 25ms</description>
+                            <applications>
+                                <application>
+                                    <name>Storage performance</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#INSTANCE} Avg. Disk sec/Write</name>
+                            <key>perf_counter_en[&quot;\PhysicalDisk({#INSTANCE})\Avg. Disk sec/Write&quot;]</key>
+                            <delay>15s</delay>
+                            <value_type>FLOAT</value_type>
+                            <units>s</units>
+                            <description>Avg. Disk sec/Write - is the average time, in seconds, of a write of data to the disk.&#13;
+&#13;
+Treshold &lt; 25ms</description>
+                            <applications>
+                                <application>
+                                    <name>Storage performance</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#INSTANCE}</lld_macro>
+                            <path>$.Name</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>

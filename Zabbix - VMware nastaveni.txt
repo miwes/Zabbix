@@ -1,0 +1,8 @@
+Zabbix nastaveni pro VMware
+---------------------------
+- zapnout vmware podporu v zabbix_server.conf
+- vytvorit uzivatele ve VMwaru s ReadOnly rolí a zaškrtnout Propagate to children
+- přilinkovat šablonu a nastavit macra
+	{$URL} - https://x.x.x.x/sdk
+	{$USERNAME} - zabbix@vsphere.local
+	{$PASSWORD}
