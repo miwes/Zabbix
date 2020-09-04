@@ -1,0 +1,18 @@
+Rucni spusteni Housekeeperu
+----------------------------
+ zabbix_server -c /some/config/path/zabbix_server.conf -R housekeeper_execute
+ 
+
+Velikost adresare
+------------------
+du -sh /var/*
+
+Zvednuti a snizeni log levelu za behu
+--------------------------------------
+zabbix_server -Rlog_level_increase="vmware collector"
+zabbix_server -Rlog_level_decrease="vmware collector"
+
+
+Seznam procesu pooleru (jejich stav)
+------------------------------------
+ps aux | grep zabbix_server

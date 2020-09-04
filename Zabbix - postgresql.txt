@@ -2,7 +2,7 @@ Sysadmin pristup:
 sudo -u postgres psql postgres
 
 Pripojeni k zabbixu databazi:
-sudo -u postgres psql postgres
+sudo -u postgres psql zabbix
 
 Velikost dat:
 WITH RECURSIVE pg_inherit(inhrelid, inhparent) AS
@@ -46,4 +46,31 @@ SELECT table_schema
   ) a
   WHERE oid = parent
 ) a
-ORDER BY total_bytes DESC;
+ORDER BY total_bytes DESC
+LIMIT (10);
+
+# nejvic zaznamu 
+SELECT 
+	COUNT(history.itemid)
+	, history.itemid
+FROM history_uint AS history
+GROUP BY history.itemid
+ORDER BY COUNT(history.itemid) DESC
+LIMIT 10;
+
+# jmeno itemu podle item.id
+SELECT i.name 
+FROM items AS i
+WHERE i.itemid=34206;
+
+# ktereho hostu
+SELECT 
+	i.name 
+	,h.host
+FROM items AS i
+LEFT JOIN hosts AS h ON i.hostid = h.hostid
+WHERE i.itemid=37642;
+
+# vycisteni tabulky od nepouzitych dat
+VACUUM FULL VERBOSE history_uint;
+
