@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-09-24T16:57:35Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating Systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Remote Connection</template>
+            <name>Template Remote Connection</name>
+            <description>Pocet prihlaseni VPN, RDP Gateway</description>
+            <groups>
+                <group>
+                    <name>Templates/Operating Systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Remote Desktop Gateway</name>
+                </application>
+                <application>
+                    <name>Routing and Remote Access</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>RAS Users</name>
+                    <key>perf_counter[\RAS Total\Total Connections,60]</key>
+                    <delay>30s</delay>
+                    <value_type>FLOAT</value_type>
+                    <description>VPN Users</description>
+                    <applications>
+                        <application>
+                            <name>Routing and Remote Access</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>RDS Gateway Users - Current connections</name>
+                    <key>perf_counter[\Terminal Service Gateway\Current connections,60]</key>
+                    <delay>30s</delay>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>Remote Desktop Gateway</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>RDS Gateway Users - Failed connections</name>
+                    <key>perf_counter[\Terminal Service Gateway\Failed connections,60]</key>
+                    <delay>30s</delay>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>Remote Desktop Gateway</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>RDS Gateway Users - Successful connections</name>
+                    <key>perf_counter[\Terminal Service Gateway\Successful connections,60]</key>
+                    <delay>30s</delay>
+                    <value_type>FLOAT</value_type>
+                    <applications>
+                        <application>
+                            <name>Remote Desktop Gateway</name>
+                        </application>
+                    </applications>
+                    <request_method>POST</request_method>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>
