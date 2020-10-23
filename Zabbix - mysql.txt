@@ -33,3 +33,6 @@ SELECT
 FROM items AS i
 LEFT JOIN hosts AS h ON i.hostid = h.hostid
 WHERE i.itemid=37642;
+
+# optimalizace (uvolneni) tabulky od smazanych dat
+optimize table history_uint;
