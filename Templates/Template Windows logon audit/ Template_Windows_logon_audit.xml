@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-10-26T18:55:15Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating Systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Windows logon audit</template>
+            <name>Template Windows logon audit</name>
+            <groups>
+                <group>
+                    <name>Templates/Operating Systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>RDP</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>RAW logon event</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>eventlog[Security,&quot;Logon Type:\s*10&quot;,,,^(4624|4625)$,,skip]</key>
+                    <delay>30s</delay>
+                    <history>5d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <applications>
+                        <application>
+                            <name>RDP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>Elevated Token:\s*No</params>
+                        </step>
+                    </preprocessing>
+                    <request_method>POST</request_method>
+                </item>
+                <item>
+                    <name>RDP failure logon</name>
+                    <type>DEPENDENT</type>
+                    <key>windows.logon.rdp.failure</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>RDP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>failed</params>
+                        </step>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(?!.*\$)Account Name:\s*(\w+)
+ \1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,&quot;Logon Type:\s*10&quot;,,,^(4624|4625)$,,skip]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{strlen()}&lt;&gt;0 and {nodata(60)}=0</expression>
+                            <name>RDP failure logon {HOST.NAME} - {ITEM.LASTVALUE}</name>
+                            <priority>INFO</priority>
+                            <description>It's function when NLA isn't enable</description>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>RDP success logon</name>
+                    <type>DEPENDENT</type>
+                    <key>windows.logon.rdp.success</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>RDP</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>success</params>
+                        </step>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(?!.*\$)Account Name:\s*(\w+)
+ \1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,&quot;Logon Type:\s*10&quot;,,,^(4624|4625)$,,skip]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{strlen()}&lt;&gt;0 and {nodata(60)}=0</expression>
+                            <name>RDP success logon {HOST.NAME} - {ITEM.LASTVALUE}</name>
+                            <priority>INFO</priority>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>

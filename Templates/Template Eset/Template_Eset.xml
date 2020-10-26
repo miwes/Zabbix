@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-09-25T06:24:02Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template ERA Eset</template>
+            <name>Template ERA Eset</name>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>ESET</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>ESET Agent</name>
+                    <type>ODBC</type>
+                    <key>db.odbc.discovery[ESETAgent,ERA]</key>
+                    <delay>1h</delay>
+                    <params>SELECT LOWER(computer_name) as HOSTNAME FROM era_db.tbl_computers;</params>
+                    <username>zabbix</username>
+                    <password>Zabbix123456</password>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#HOSTNAME} - Low disc space [&lt;1GB]</name>
+                            <type>ODBC</type>
+                            <key>db.odbc.select[LowSpace-{#HOSTNAME},ERA]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <params>SELECT IFNULL(&#13;
+	(SELECT &#13;
+		DGL.Occurred&#13;
+	FROM tblf_dynamicgroups_content_status AS DGL&#13;
+	JOIN vw_dynamic_groups_templates_with_version AS DGT ON DGT.template_uuid = DGL.Uuid&#13;
+	JOIN tbl_dynamic_groups AS DG ON DG.template_uuid = DGT.template_uuid&#13;
+	JOIN tbl_computers AS C ON C.computer_uuid = DGL.SourceUuid&#13;
+	WHERE group_name = 'Servery mene jak 1GB na C' AND computer_name = '{#HOSTNAME}'  AND DeltaAction = 1)&#13;
+,'-no data-')</params>
+                            <username>zabbix</username>
+                            <password>Zabbix123456</password>
+                            <applications>
+                                <application>
+                                    <name>ESET</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{str(-no data-)}=0</expression>
+                                    <name>{#HOSTNAME} - Low disc space [&lt;1GB]</name>
+                                    <priority>HIGH</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#HOSTNAME} - Thread event</name>
+                            <type>ODBC</type>
+                            <key>db.odbc.select[{#HOSTNAME},ERA]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <params>SELECT IFNULL(&#13;
+	(SELECT &#13;
+		CONCAT(TTE.Occurred,' ',TTE.ObjectUri)&#13;
+	FROM tblf_threat_event AS TTE&#13;
+	JOIN tbl_computers AS TC ON TC.computer_uuid = TTE.SourceUuid&#13;
+	WHERE TC.computer_name = '{#HOSTNAME}'&#13;
+	ORDER BY TTE.Occurred  DESC,TTE.ObjectUri &#13;
+	LIMIT 1)&#13;
+,'-no data-')</params>
+                            <username>zabbix</username>
+                            <password>Zabbix123456</password>
+                            <applications>
+                                <application>
+                                    <name>ESET</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{diff()}&gt;0 and {str(-no data-)}=0</expression>
+                                    <name>{#HOSTNAME} - ESET Event detect</name>
+                                    <priority>HIGH</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>
