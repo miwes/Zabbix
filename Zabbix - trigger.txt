@@ -1,0 +1,7 @@
+https://www.zabbix.com/documentation/5.0/manual/config/triggers/expression
+
+.min(#3)}>30000
+- That says, if the minimum value over the last 3 intervals is greater than 30000, then fire
+
+.last(#3)>x
+- third most recent value (not three latest values)
