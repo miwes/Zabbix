@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-08-31T07:58:38Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template AC Ansible</template>
+            <name>Template AC Ansible</name>
+            <description>Version 1.0.2</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Ansible</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery Ansible servers</name>
+                    <key>ansible.discovery[{$ANSIBLELOG}]</key>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Failed or Unreachable {#SERVERNAME}</name>
+                            <key>ansible.server[{$ANSIBLELOG},{#SERVERNAME}]</key>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Ansible</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>REGEX</type>
+                                    <params>failed=([1-9])|unreachable=([1-9])
+\1 \2</params>
+                                    <error_handler>CUSTOM_VALUE</error_handler>
+                                    <error_handler_params>0</error_handler_params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$ANSIBLELOG}</macro>
+                    <value>/usr/lib/zabbix/ansible.log</value>
+                    <description>Path for ansible log</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
