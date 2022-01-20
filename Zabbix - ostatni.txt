@@ -19,3 +19,9 @@ ps aux | grep zabbix_server
 watch -n 0.2 ps -fu zabbix
 watch -tn 0.2 'ps -fC zabbix_server | grep history'
 watch -tn 0.2 'ps -fC zabbix_server | grep poller'
+
+Pustit jako zabbix identita pro otestovani
+------------------------------------------
+sudo -u zabbix bash
+cd /var/log/
+less messages
