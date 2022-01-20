@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-01-20T06:47:00Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template AC Hyper-V Replica</template>
+            <name>Template AC Hyper-V Replica</name>
+            <description>Version 1.0</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Replicas</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery VM Replicas</name>
+                    <key>replica.list</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#REPLICANAME} snapshot date</name>
+                            <key>replica.snapshotDate[{#REPLICANAME}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <units>unixtime</units>
+                            <applications>
+                                <application>
+                                    <name>Replicas</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{now()}-{last()} &gt; 259200</expression>
+                                    <name>{#REPLICANAME} is older than 3 days</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#REPLICANAME} state</name>
+                            <key>replica.status[{#REPLICANAME}]</key>
+                            <delay>1h</delay>
+                            <history>7d</history>
+                            <applications>
+                                <application>
+                                    <name>Replicas</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>AC HyperV Replica</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;0</expression>
+                                    <name>{#REPLICANAME} is not OK</name>
+                                    <priority>WARNING</priority>
+                                    <description>VM storage is on same storage as replica.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>AC HyperV Replica</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>OK</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Failed</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
