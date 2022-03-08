@@ -27,6 +27,12 @@ Presmerovani na HTTPs
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}
 
+Zapnuti HTST
+------------
+1. Zapnuti modulu 
+	sudo a2enmod headers
+2. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
+	Header set Strict-Transport-Security "max-age=31536000"
 
 Zabbix na root webu
 ----------------------
