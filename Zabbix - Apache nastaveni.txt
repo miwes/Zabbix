@@ -34,6 +34,13 @@ Zapnuti HTST
 2. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
 	Header set Strict-Transport-Security "max-age=31536000"
 
+Vypnuti signature
+-----------------
+1. Pridat konfiguraci do /etc/apache2/conf-enabled/security.conf 
+	ServerSignature Off 
+	ServerTokens Prod
+
+
 Zabbix na root webu
 ----------------------
 1. Editovat /etc/apache2/sites-available/000-default.conf i SSL
