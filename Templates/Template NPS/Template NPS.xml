@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-02-24T13:35:01Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template AC NPS audit logon</template>
+            <name>Template AC NPS audit logon</name>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>NPS</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>RAW NPS logon event</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]</key>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>NPS</name>
+                        </application>
+                    </applications>
+                </item>
+                <item>
+                    <name>NPS failure logon</name>
+                    <type>DEPENDENT</type>
+                    <key>nps.logon.failure</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>NPS</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>NOT_MATCHES_REGEX</type>
+                            <params>(granted|discarded)</params>
+                        </step>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(?!.*\$)Account Name:\s*(.*\w*)
+\1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{str()}&lt;&gt;0</expression>
+                            <name>NPS failure logon  {HOST.NAME} - {ITEM.VALUE}</name>
+                            <priority>WARNING</priority>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>NPS success logon</name>
+                    <type>DEPENDENT</type>
+                    <key>nps.logon.success</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>NPS</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>granted</params>
+                        </step>
+                        <step>
+                            <type>REGEX</type>
+                            <params>(?!.*\$)Account Name:\s*(.*\w*)
+\1</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]</key>
+                    </master_item>
+                </item>
+            </items>
+        </template>
+    </templates>
+</zabbix_export>

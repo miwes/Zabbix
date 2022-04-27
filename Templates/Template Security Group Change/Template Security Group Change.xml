@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-02-25T08:46:24Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating Systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template AC Security group change</template>
+            <name>Template AC Security group change</name>
+            <description>Author : Michal Weis, AUTOCONT CZ a.s.&#13;
+Version : 1.1&#13;
+- change regex on RAW Items</description>
+            <groups>
+                <group>
+                    <name>Templates/Operating Systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>AD Groups</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>Security group add member</name>
+                    <type>DEPENDENT</type>
+                    <key>ad.groups.security.add</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>AD Groups</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var regEx = /(?!.*\$)Account Name:\s*(.*\w*)/gim;
+var match = regEx.exec(value)
+var strWho = match[1];
+match = regEx.exec(value);
+var strMember = match[1];
+regEx = /(?!.*\$)Group Name:\s*(.*\w*)/gim;
+match = regEx.exec(value);
+var strGroup = match[1];
+return &quot;Add member [&quot; + strMember + &quot;] to group [&quot; + strGroup + &quot;] - added by [&quot; + strWho + &quot;]&quot;;</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,,,,4728|4756|4732,,skip]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{str()}&lt;&gt;0</expression>
+                            <name>Security group change (add member) - {ITEM.VALUE}</name>
+                            <priority>WARNING</priority>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Security group remove member</name>
+                    <type>DEPENDENT</type>
+                    <key>ad.groups.security.renove</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>AD Groups</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var regEx = /(?!.*\$)Account Name:\s*(.*\w*)/gim;
+var match = regEx.exec(value)
+var strWho = match[1];
+match = regEx.exec(value);
+var strMember = match[1];
+regEx = /(?!.*\$)Group Name:\s*(.*\w*)/gim;
+match = regEx.exec(value);
+var strGroup = match[1];
+return &quot;Remove member [&quot; + strMember + &quot;] from group [&quot; + strGroup + &quot;] - removed by [&quot; + strWho + &quot;]&quot;;</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>eventlog[Security,,,,4729|4757|4733,,skip]</key>
+                    </master_item>
+                    <triggers>
+                        <trigger>
+                            <expression>{str()}&lt;&gt;0</expression>
+                            <name>Security group change (remove member) - {ITEM.VALUE}</name>
+                            <priority>WARNING</priority>
+                            <type>MULTIPLE</type>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>RAW Security group add members</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>eventlog[Security,,,,4728|4756|4732,,skip]</key>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>AD Groups</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>(Group Name:.[ \t]).*({$SECURITY_GROUPS})</params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>RAW Security group remove members</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>eventlog[Security,,,,4729|4757|4733,,skip]</key>
+                    <history>0</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>AD Groups</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MATCHES_REGEX</type>
+                            <params>(Group Name:.[ \t]).*({$SECURITY_GROUPS})</params>
+                        </step>
+                    </preprocessing>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$SECURITY_GROUPS}</macro>
+                    <value>[Aa][Dd][Mm][Ii][Nn]|VPN</value>
+                    <description>Security groups for check</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
