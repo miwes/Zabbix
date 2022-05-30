@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-05-30T13:02:27Z</date>
+    <groups>
+        <group>
+            <name>Templates/Applications</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template AC Veeam</template>
+            <name>Template AC Veeam</name>
+            <description>Version 1.0</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Veeam</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery Veeam Jobs</name>
+                    <key>veeam.jobsDiscovery</key>
+                    <delay>1h</delay>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Last run {#BACKUPJOBNAME}</name>
+                            <key>veeam.jobStatus[{#BACKUPJOBNAME},&quot;LastRun&quot;]</key>
+                            <delay>1h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <description>{#BACKUPJOBDESCRIPTION}</description>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Status {#BACKUPJOBNAME}</name>
+                            <key>veeam.jobStatus[{#BACKUPJOBNAME},&quot;Status&quot;]</key>
+                            <delay>1h</delay>
+                            <history>30d</history>
+                            <description>{#BACKUPJOBDESCRIPTION}</description>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>Veeam Job status</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>Success
+1</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>Warning
+2</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>Failed
+3</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>Not readable
+0</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>Running
+4</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}=3</expression>
+                                    <name>Failed state backup job - {#BACKUPJOBNAME}</name>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}=2</expression>
+                                    <name>Warning state backup job - {#BACKUPJOBNAME}</name>
+                                    <priority>WARNING</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Discovery Veeam Repositories</name>
+                    <key>veeam.repositoryDiscovery</key>
+                    <delay>1h</delay>
+                    <lifetime>7d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Veeam repository {#REPOSITORYNAME} - % free space</name>
+                            <type>CALCULATED</type>
+                            <key>veeam.repository.freePercentSpace[{#REPOSITORYNAME}]</key>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <params>100*last(&quot;veeam.repository.freeSpace[{#REPOSITORYNAME}]&quot;)/last(&quot;veeam.repository.totalSpace[{#REPOSITORYNAME}]&quot;)</params>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;{$REPOSITORYFREESPACEPERCENT}</expression>
+                                    <name>% Low free space {#REPOSITORYNAME} - less {$REPOSITORYFREESPACEPERCENT}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Veeam repository {#REPOSITORYNAME} - free space</name>
+                            <type>DEPENDENT</type>
+                            <key>veeam.repository.freeSpace[{#REPOSITORYNAME}]</key>
+                            <delay>0</delay>
+                            <units>B</units>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$..REPOSITORYFREESPACE</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>[&quot;
+</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>&quot;]
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>veeam.repositoryStatus[&quot;{#REPOSITORYID}&quot;]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&quot;{$REPOSITORYFREESPACEGB}*1024*1024*1024&quot;</expression>
+                                    <name>Low free space {#REPOSITORYNAME} - less {$REPOSITORYFREESPACEGB}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Veeam repository {#REPOSITORYNAME} - total space</name>
+                            <type>DEPENDENT</type>
+                            <key>veeam.repository.totalSpace[{#REPOSITORYNAME}]</key>
+                            <delay>0</delay>
+                            <units>B</units>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$..REPOSITORYSIZE</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>[&quot;
+</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>&quot;]
+</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>veeam.repositoryStatus[&quot;{#REPOSITORYID}&quot;]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Veeam repository {#REPOSITORYNAME} - raw</name>
+                            <key>veeam.repositoryStatus[&quot;{#REPOSITORYID}&quot;]</key>
+                            <history>0</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Veeam</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$REPOSITORYFREESPACEGB}</macro>
+                    <value>1</value>
+                    <description>GB free space warning</description>
+                </macro>
+                <macro>
+                    <macro>{$REPOSITORYFREESPACEPERCENT}</macro>
+                    <value>5</value>
+                    <description>% free space warning</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Veeam Job status</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Not readable</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Success</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>Warning</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>Failed</newvalue>
+                </mapping>
+                <mapping>
+                    <value>4</value>
+                    <newvalue>Running</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
