@@ -15,7 +15,7 @@
 
 [CmdletBinding()]Param (
      [Parameter(Mandatory=$False)] [Alias("Discovery")]   [switch]$attrDiscovery
-    ,[Parameter(Mandatory=$False)] [Alias("JobID")]       [string]$attrJobID
+    ,[Parameter(Mandatory=$False)] [Alias("JobName")]     [string]$attrJobName
     ,[Parameter(Mandatory=$False)] [Alias("Information")] [ValidateSet('Status','State','LastRun')] [string]$attrInformation = 'Status'
 )
 
@@ -74,10 +74,10 @@ If ($attrDiscovery)
     $returnJSON = $returnJSON -replace ".$"
     $returnJSON += ']'
 }
-ElseIf ($attrJobID)
+ElseIf ($attrJobName)
 {
     # get Veeam job
-    $job = Get-VBRJob | Where-Object {$_.id -eq $attrJobID}
+    $job = Get-VBRJob -Name $attrJobName 
 
     # find last session
     $session = $job.FindLastSession()
