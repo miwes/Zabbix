@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2022-05-30T13:02:27Z</date>
+    <date>2022-06-13T06:55:53Z</date>
     <groups>
         <group>
             <name>Templates/Applications</name>
@@ -31,7 +31,7 @@
                     <item_prototypes>
                         <item_prototype>
                             <name>Last run {#BACKUPJOBNAME}</name>
-                            <key>veeam.jobStatus[{#BACKUPJOBNAME},&quot;LastRun&quot;]</key>
+                            <key>veeam.jobStatus[{#BACKUPJOBID},&quot;LastRun&quot;]</key>
                             <delay>1h</delay>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
@@ -44,7 +44,7 @@
                         </item_prototype>
                         <item_prototype>
                             <name>Status {#BACKUPJOBNAME}</name>
-                            <key>veeam.jobStatus[{#BACKUPJOBNAME},&quot;Status&quot;]</key>
+                            <key>veeam.jobStatus[{#BACKUPJOBID},&quot;Status&quot;]</key>
                             <delay>1h</delay>
                             <history>30d</history>
                             <description>{#BACKUPJOBDESCRIPTION}</description>

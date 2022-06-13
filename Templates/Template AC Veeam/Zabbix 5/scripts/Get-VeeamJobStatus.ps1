@@ -15,8 +15,8 @@
 
 [CmdletBinding()]Param (
      [Parameter(Mandatory=$False)] [Alias("Discovery")]   [switch]$attrDiscovery
-    ,[Parameter(Mandatory=$False)] [Alias("JobName")]     [string]$attrJobName
-    ,[Parameter(Mandatory=$False)] [Alias("Information")] [ValidateSet('Status','State','LastRun')] [string]$attrInformation = 'Status'
+    ,[Parameter(Mandatory=$False)] [Alias("JobID")]     [string]$attrJobID
+    ,[Parameter(Mandatory=$False)] [Alias("Information")] [ValidateSet('Status','LastRun')] [string]$attrInformation = 'Status'
 )
 
 
@@ -52,7 +52,8 @@ If ($attrDiscovery)
     Write-Verbose "[info]; Get Veeam jobs"
     Try 
     {
-        $jobs = Get-VBRJob
+        #$jobs = Get-VBRJob
+        $jobs = [Veeam.Backup.Core.CBackupJob]::GetAll()
     } 
     Catch 
     {
@@ -66,6 +67,7 @@ If ($attrDiscovery)
         $returnJSON += '{'
         $returnJSON += '"{#BACKUPJOBNAME}":"' + $job.Name + '",'
         $description = ($job.Description).Replace('\','\\')
+        $returnJSON += '"{#BACKUPJOBID}":"' + $job.id + '",'
         $returnJSON += '"{#BACKUPJOBDESCRIPTION}":"' + $description + '"'
         $returnJSON += '},'
     }
@@ -74,14 +76,10 @@ If ($attrDiscovery)
     $returnJSON = $returnJSON -replace ".$"
     $returnJSON += ']'
 }
-ElseIf ($attrJobName)
+ElseIf ($attrJobID)
 {
-    # get Veeam job
-    $job = Get-VBRJob -Name $attrJobName 
-
     # find last session
-    $session = $job.FindLastSession()
-    
+    $session = [Veeam.Backup.Core.CBackupJob]::FindLastSession($attrJobID)
     Switch ($attrInformation)
     {
         'Status'   
@@ -89,7 +87,7 @@ ElseIf ($attrJobName)
             Try 
             {
                 # only read when job not running
-                If ($session.state -eq 'Stopped') 
+                If ($session.State -eq 'Stopped') 
                 {
                     $returnJSON = $session.result.ToString().Trim()
                 }
@@ -103,22 +101,11 @@ ElseIf ($attrJobName)
                 $returnJSON = 'Not readable'
             }
         }
-        'State'
-        { 
-            Try 
-            {
-                $returnJSON = $session.state.ToString().Trim()
-            }
-            Catch
-            {
-                $returnJSON = 'Not readable'
-            }
-        }
         'LastRun'  
         { 
             Try 
             {
-                $returnJSON = $job.LatestRunLocal.ToString().Trim()
+                $returnJSON = $session.EndTime.ToString().Trim()
             }
             Catch
             {
