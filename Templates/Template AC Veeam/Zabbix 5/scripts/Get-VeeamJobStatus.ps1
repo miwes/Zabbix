@@ -67,7 +67,7 @@ If ($attrDiscovery)
         $returnJSON += '{'
         $returnJSON += '"{#BACKUPJOBNAME}":"' + $job.Name + '",'
         $description = ($job.Description).Replace('\','\\')
-        $description = $description.replace("`n",", ").replace("`r",", ")
+        $description = $description -replace "`t|`n|`r",""
         $returnJSON += '"{#BACKUPJOBID}":"' + $job.id + '",'
         $returnJSON += '"{#BACKUPJOBDESCRIPTION}":"' + $description + '"'
         $returnJSON += '},'
