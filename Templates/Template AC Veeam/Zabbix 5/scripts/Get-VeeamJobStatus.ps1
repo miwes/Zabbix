@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Read information about jobs
 .DESCRIPTION
@@ -67,6 +67,7 @@ If ($attrDiscovery)
         $returnJSON += '{'
         $returnJSON += '"{#BACKUPJOBNAME}":"' + $job.Name + '",'
         $description = ($job.Description).Replace('\','\\')
+        $description = $description.replace("`n",", ").replace("`r",", ")
         $returnJSON += '"{#BACKUPJOBID}":"' + $job.id + '",'
         $returnJSON += '"{#BACKUPJOBDESCRIPTION}":"' + $description + '"'
         $returnJSON += '},'
