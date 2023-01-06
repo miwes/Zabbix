@@ -1,0 +1,217 @@
+zabbix_export:
+
+  version: '6.0'
+
+  date: '2022-12-06T14:16:36Z'
+
+  groups:
+
+    -
+
+      uuid: 7c2cb727f85b492d88cd56e17127c64d
+
+      name: Templates/SAN
+
+  templates:
+
+    -
+
+      uuid: 569a8da8fdea42df9dfbcc764fc7c4b5
+
+      template: 'Template AC Vmware VSAN'
+
+      name: 'Template AC Vmware VSAN'
+
+      groups:
+
+        -
+
+          name: Templates/SAN
+
+      items:
+
+        -
+
+          uuid: 600cdc1f44934b69aaa89be00897210f
+
+          name: 'VSAN Status RAW'
+
+          type: EXTERNAL
+
+          key: 'Wrapper-VSAN.sh[{$VSAN_VCENTER},{$VSAN_NAME},{$VSAN_USER},{$VSAN_PASS},status]'
+
+          delay: 1h
+
+          history: 1d
+
+          trends: '0'
+
+          value_type: TEXT
+
+      discovery_rules:
+
+        -
+
+          uuid: cda0c977cd854ff2a477f2e1a5ef9be8
+
+          name: 'Discovery Hosts'
+
+          type: EXTERNAL
+
+          key: 'Wrapper-VSAN.sh[{$VSAN_VCENTER},{$VSAN_NAME},{$VSAN_USER},{$VSAN_PASS},discovery]'
+
+          item_prototypes:
+
+            -
+
+              uuid: b64bdfb8fa3a4291973dea64d7d0a9ee
+
+              name: 'VSAN Host {#HOST}'
+
+              type: DEPENDENT
+
+              key: 'vsan.status["{#HOST}"]'
+
+              delay: '0'
+
+              valuemap:
+
+                name: 'VSAN Status'
+
+              preprocessing:
+
+                -
+
+                  type: JSONPATH
+
+                  parameters:
+
+                    - '$.data..[''{#HOST}'']'
+
+                -
+
+                  type: STR_REPLACE
+
+                  parameters:
+
+                    - '["'
+
+                    - ''
+
+                -
+
+                  type: STR_REPLACE
+
+                  parameters:
+
+                    - '"]'
+
+                    - ''
+
+                -
+
+                  type: STR_REPLACE
+
+                  parameters:
+
+                    - green
+
+                    - '0'
+
+                -
+
+                  type: STR_REPLACE
+
+                  parameters:
+
+                    - orange
+
+                    - '1'
+
+                -
+
+                  type: STR_REPLACE
+
+                  parameters:
+
+                    - red
+
+                    - '2'
+
+              master_item:
+
+                key: 'Wrapper-VSAN.sh[{$VSAN_VCENTER},{$VSAN_NAME},{$VSAN_USER},{$VSAN_PASS},status]'
+
+              tags:
+
+                -
+
+                  tag: Application
+
+                  value: VSAN
+
+              trigger_prototypes:
+
+                -
+
+                  uuid: ba3a23d93c724060887f7d83d2bc1832
+
+                  expression: 'last(/Template AC Vmware VSAN/vsan.status["{#HOST}"])<>0'
+
+                  name: 'VSAN Host {#HOST} isn''t healthy'
+
+                  priority: WARNING
+
+      macros:
+
+        -
+
+          macro: '{$VSAN_NAME}'
+
+          value: Cluster_vSAN01
+
+        -
+
+          macro: '{$VSAN_PASS}'
+
+          type: SECRET_TEXT
+
+        -
+
+          macro: '{$VSAN_USER}'
+
+          value: zabix_ro_vsan@vsphere.local
+
+        -
+
+          macro: '{$VSAN_VCENTER}'
+
+          value: srv-tck-vc.nt1.ku.ji.cz
+
+      valuemaps:
+
+        -
+
+          uuid: 0e4fed3ee33d4983af0dcae936933db5
+
+          name: 'VSAN Status'
+
+          mappings:
+
+            -
+
+              value: '0'
+
+              newvalue: green
+
+            -
+
+              value: '1'
+
+              newvalue: orange
+
+            -
+
+              value: '2'
+
+              newvalue: red

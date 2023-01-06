@@ -1,0 +1,1 @@
+python3 /usr/lib/zabbix/externalscripts/VSAN/get-VSANCluster.py $1 $2 $3 $4 $5

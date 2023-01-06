@@ -1,0 +1,1 @@
+pwsh -file /usr/lib/zabbix/externalscripts/get-perfCounter.ps1 $1 $2

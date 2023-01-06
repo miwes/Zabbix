@@ -1,0 +1,20 @@
+{
+    "data": [
+    {
+        "{#NODENAME}": "node1",
+        "{#NODEINTERFACE}": "eth0"
+    },
+    {
+        "{#NODENAME}": "node1",
+        "{#NODEINTERFACE}": "eth1"
+    },
+    {
+        "{#NODENAME}": "node2",
+        "{#NODEINTERFACE}": "eth2"
+    },
+    {
+        "{#NODENAME}": "node2",
+        "{#NODEINTERFACE}": "eth3"
+    }
+]
+}
