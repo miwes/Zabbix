@@ -13,7 +13,7 @@ $QLength = (Get-Counter '\System\Processor Queue Length').CounterSamples.CookedV
 $JSON  = '{"performance":{'
 $JSON += '"memory": "' + $MemoryUsage + '",'
 $JSON += '"cpu": "' + $CPU + '",'
-$JSON += '"queueLength: "' + $QLength + '"'
+$JSON += '"queueLength" : "' + $QLength + '"'
 $JSON += '}}'
 
 $JSON
