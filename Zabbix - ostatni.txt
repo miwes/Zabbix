@@ -1,6 +1,6 @@
 Rucni spusteni Housekeeperu
 ----------------------------
-zabbix_server -c /some/config/path/zabbix_server.conf -R housekeeper_execute
+zabbix_server -c /etc/zabbix/zabbix_server.conf -R housekeeper_execute
  
 
 Velikost adresare
