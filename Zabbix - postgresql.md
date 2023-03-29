@@ -1,10 +1,14 @@
-Sysadmin pristup:
+### Sysadmin pristup:
+```
 sudo -u postgres psql postgres
-
-Pripojeni k zabbixu databazi:
+```
+### Pripojeni k zabbixu databazi:
+```
 sudo -u postgres psql zabbix
+```
 
-Velikost dat:
+### Velikost dat
+```
 WITH RECURSIVE pg_inherit(inhrelid, inhparent) AS
     (select inhrelid, inhparent
     FROM pg_inherits
@@ -48,8 +52,9 @@ SELECT table_schema
 ) a
 ORDER BY total_bytes DESC
 LIMIT (10);
-
-# nejvic zaznamu 
+```
+## nejvic zaznamu 
+```
 SELECT 
 	COUNT(history.itemid)
 	, history.itemid
@@ -57,25 +62,30 @@ FROM history_uint AS history
 GROUP BY history.itemid
 ORDER BY COUNT(history.itemid) DESC
 LIMIT 10;
-
-# jmeno itemu podle item.id
+```
+## jmeno itemu podle item.id
+```
 SELECT i.name 
 FROM items AS i
 WHERE i.itemid=34206;
-
-# ktereho hostu
+```
+## ktereho hostu
+```
 SELECT 
 	i.name 
 	,h.host
 FROM items AS i
 LEFT JOIN hosts AS h ON i.hostid = h.hostid
 WHERE i.itemid=37642;
-
-# vycisteni tabulky od nepouzitych dat
+```
+## vycisteni tabulky od nepouzitych dat
+```
 VACUUM FULL VERBOSE history_uint;
-
-# List running queries
+```
+## List running queries
+```
 SELECT pid, age(clock_timestamp(), query_start), usename, query 
 FROM pg_stat_activity 
 WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' 
 ORDER BY query_start desc;
+```
