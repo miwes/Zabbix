@@ -84,7 +84,7 @@ VACUUM FULL VERBOSE history_uint;
 ```
 ## List running queries
 ```
-SELECT pid, age(clock_timestamp(), query_start), usename, query 
+SELECT pid, age(clock_timestamp(), query_start), usename, query, wait_event_type, wait_event, state
 FROM pg_stat_activity 
 WHERE query != '<IDLE>' AND query NOT ILIKE '%pg_stat_activity%' 
 ORDER BY query_start desc;
