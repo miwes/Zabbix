@@ -1,0 +1,86 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-04-18T12:29:10Z'
+  groups:
+    -
+      uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    -
+      uuid: ee8d8c7052454487a85a9dbc6a2af72a
+      template: 'Template AC Audit NPS logon'
+      name: 'Template AC Audit NPS logon'
+      groups:
+        -
+          name: Templates/Applications
+      items:
+        -
+          uuid: 262430f964394f60a0d8ee0f1d6871d5
+          name: 'RAW NPS logon event'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]'
+          history: '0'
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: Application
+              value: NPS
+        -
+          uuid: d14ca25f8b034b3cb26fc8f58f6c4cd9
+          name: 'NPS failure logon'
+          type: DEPENDENT
+          key: nps.logon.failure
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: NOT_MATCHES_REGEX
+              parameters:
+                - (granted|discarded)
+            -
+              type: REGEX
+              parameters:
+                - '(?!.*\$)Account Name:\s*(.*\w*)'
+                - \1
+          master_item:
+            key: 'eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]'
+          tags:
+            -
+              tag: Application
+              value: NPS
+          triggers:
+            -
+              uuid: c2998eca22334cbb84fea77a6d1917c8
+              expression: 'find(/Template AC Audit NPS logon/nps.logon.failure,,"like")<>0'
+              name: 'NPS failure logon  {HOST.NAME} - {ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+        -
+          uuid: cc887e3a956d49c8b747ab6f2ad3a3f6
+          name: 'NPS success logon'
+          type: DEPENDENT
+          key: nps.logon.success
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: MATCHES_REGEX
+              parameters:
+                - granted
+            -
+              type: REGEX
+              parameters:
+                - '(?!.*\$)Account Name:\s*(.*\w*)'
+                - \1
+          master_item:
+            key: 'eventlog[Security,,,,^(6272|6273|6274|6275|6276|6277|6279|6280)$,,skip]'
+          tags:
+            -
+              tag: Application
+              value: NPS

@@ -1,0 +1,131 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-04-18T12:29:21Z'
+  groups:
+    -
+      uuid: b1a65eeba3cc4c9fb198e8f18f433839
+      name: 'Templates/Operating Systems'
+  templates:
+    -
+      uuid: f98026b41ad9478da5955c26298a9de6
+      template: 'Template AC Audit Security group change'
+      name: 'Template AC Audit Security group change'
+      description: |
+        Author : Michal Weis, AUTOCONT CZ a.s.
+        Version : 1.1
+        - change regex on RAW Items
+      groups:
+        -
+          name: 'Templates/Operating Systems'
+      items:
+        -
+          uuid: 4409985459c84850b3f3203c4ff023b0
+          name: 'Security group add member'
+          type: DEPENDENT
+          key: ad.groups.security.add
+          delay: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var regEx = /(?!.*\$)Account Name:\s*(.*\w*)/gim;
+                  var match = regEx.exec(value)
+                  var strWho = match[1];
+                  match = regEx.exec(value);
+                  var strMember = match[1];
+                  regEx = /(?!.*\$)Group Name:\s*(.*\w*)/gim;
+                  match = regEx.exec(value);
+                  var strGroup = match[1];
+                  return "Add member [" + strMember + "] to group [" + strGroup + "] - added by [" + strWho + "]";
+          master_item:
+            key: 'eventlog[Security,,,,4728|4756|4732,,skip]'
+          tags:
+            -
+              tag: Application
+              value: 'AD Groups'
+          triggers:
+            -
+              uuid: a4f51ce0d40b47e3aab4778e37355e65
+              expression: 'find(/Template AC Audit Security group change/ad.groups.security.add,,"like")<>0'
+              name: 'Security group change (add member) - {ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+        -
+          uuid: 1c965449d153468dabec094910e414fe
+          name: 'Security group remove member'
+          type: DEPENDENT
+          key: ad.groups.security.renove
+          delay: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var regEx = /(?!.*\$)Account Name:\s*(.*\w*)/gim;
+                  var match = regEx.exec(value)
+                  var strWho = match[1];
+                  match = regEx.exec(value);
+                  var strMember = match[1];
+                  regEx = /(?!.*\$)Group Name:\s*(.*\w*)/gim;
+                  match = regEx.exec(value);
+                  var strGroup = match[1];
+                  return "Remove member [" + strMember + "] from group [" + strGroup + "] - removed by [" + strWho + "]";
+          master_item:
+            key: 'eventlog[Security,,,,4729|4757|4733,,skip]'
+          tags:
+            -
+              tag: Application
+              value: 'AD Groups'
+          triggers:
+            -
+              uuid: cb9249bfbda549a58ead1f0661753f84
+              expression: 'find(/Template AC Audit Security group change/ad.groups.security.renove,,"like")<>0'
+              name: 'Security group change (remove member) - {ITEM.VALUE}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+        -
+          uuid: 93dcae253f0e48319fd312c977423548
+          name: 'RAW Security group add members'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security,,,,4728|4756|4732,,skip]'
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: MATCHES_REGEX
+              parameters:
+                - '(Group Name:.[ \t]).*({$SECURITY_GROUPS})'
+          tags:
+            -
+              tag: Application
+              value: 'AD Groups'
+        -
+          uuid: a8ea8ec44a144589b4dc871366d0ea5a
+          name: 'RAW Security group remove members'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security,,,,4729|4757|4733,,skip]'
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: MATCHES_REGEX
+              parameters:
+                - '(Group Name:.[ \t]).*({$SECURITY_GROUPS})'
+          tags:
+            -
+              tag: Application
+              value: 'AD Groups'
+      macros:
+        -
+          macro: '{$SECURITY_GROUPS}'
+          value: '[Aa][Dd][Mm][Ii][Nn]|[Vv][Pp][Nn]'
+          description: 'Security groups for check'

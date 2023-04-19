@@ -1,0 +1,80 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-04-18T12:28:59Z'
+  groups:
+    -
+      uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    -
+      uuid: 8f10085f15d14295aaa66513b2d51c21
+      template: 'Template AC Audit Account'
+      name: 'Template AC Audit Account'
+      groups:
+        -
+          name: Templates/Applications
+      items:
+        -
+          uuid: daf2ec621e544f8c9b22c094b38449ef
+          name: 'Event create account -  {ITEM.VALUE}'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security,,,,4720,,skip]'
+          history: 30d
+          trends: '0'
+          value_type: LOG
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  regEx = /(?!.*\$)Security ID:\s*(.*\w*)/gim;
+                  var match = regEx.exec(value)
+                  var strWho = match[1];
+                  var match = regEx.exec(value)
+                  var strNewUser = match[1];
+                  
+                  return "Create new user - " + strNewUser + " (created by " + strWho + ")";
+          tags:
+            -
+              tag: Application
+              value: Audit
+          triggers:
+            -
+              uuid: b34c2991779c4f948d8bd6e698bf8cb8
+              expression: 'find(/Template AC Audit Account/eventlog[Security,,,,4720,,skip],,,"create")<>0'
+              name: 'New account create - {ITEM.VALUE}'
+              priority: INFO
+              type: MULTIPLE
+              manual_close: 'YES'
+        -
+          uuid: 3989a637d21d48dca3f6b07934dfa327
+          name: 'Event account was locked out -  {ITEM.VALUE}'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security,,,,4740,,skip]'
+          history: 30d
+          trends: '0'
+          value_type: LOG
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  regEx = /(?!.*\$)Security ID:\s*(.*\w*)/gim;
+                  var match = regEx.exec(value)
+                  var strWho = match[1];
+                  var match = regEx.exec(value)
+                  var strNewUser = match[1];
+                  
+                  return "User account was locked out - " + strNewUser;
+          tags:
+            -
+              tag: Application
+              value: Audit
+          triggers:
+            -
+              uuid: 725a0b67b43b40c099174c4b5371f118
+              expression: 'find(/Template AC Audit Account/eventlog[Security,,,,4740,,skip],,,"locked")<>0'
+              name: 'Account was locked out - {ITEM.VALUE}'
+              priority: INFO
+              type: MULTIPLE
+              manual_close: 'YES'

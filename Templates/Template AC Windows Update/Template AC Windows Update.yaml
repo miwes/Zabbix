@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2023-03-07T14:57:43Z'
+  date: '2023-04-18T12:29:46Z'
   groups:
     -
       uuid: b1a65eeba3cc4c9fb198e8f18f433839
@@ -18,7 +18,8 @@ zabbix_export:
           uuid: 26533023da834206b8c34e56221354f2
           name: 'Missing Windows update'
           key: ac.windows.update
-          delay: 1d
+          delay: 12h
+          units: Updates
           tags:
             -
               tag: Application
