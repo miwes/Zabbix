@@ -2,6 +2,9 @@
 .SYNOPSIS
 	Install Zabbix Agent MSI Remote
 .DESCRIPTION
+	Version :
+		1.0 - Initial realease
+		1.1	- Change PSExec to Invoke-Command
 .NOTES
 .LINK
 .EXAMPLE
@@ -9,10 +12,13 @@
 #>
 
 [CmdletBinding()]Param (
-    [Parameter(Mandatory=$True,Position=1)] [Alias("ServerName")] [string]$attrServername
-    ,[Parameter(Mandatory=$False,Position=2)] [Alias("FileMSI")] [string]$attrFileMSI = '\\server\zabbix\Agent\zabbix_agent-5.0.4-windows-amd64-openssl.msi'
-    ,[Parameter(Mandatory=$False,Position=3)] [Alias("ZabbixServer")] [string]$attrZabbixServer = 'zabbix'
-    ,[Parameter(Mandatory=$False,Position=3)] [Alias("ZabbixConfigFiles")] [string]$attrZabbixConfigFiles = '\\server\zabbix\Config\'
+    [Parameter(Mandatory=$True)] [Alias("ServerName")] [string]$attrServername
+    ,[Parameter(Mandatory=$False)] [Alias("FileMSI")] [string]$attrFileMSI = '\\server\c$\ac\zabbix_agent2-6.0.17-windows-amd64-openssl.msi'
+    ,[Parameter(Mandatory=$False)] [Alias("ZabbixServer")] [string]$attrZabbixServer = 'x.x.x.x'
+    ,[Parameter(Mandatory=$False)] [Alias("ZabbixConfigFiles")] [string]$attrZabbixConfigFiles = '\\server\c$\ac\Zabbix\Config\'
+	
+	# add as suffix on hostname in zabbix agent config file
+	,[Parameter(Mandatory=$False)] [Alias("DomainName")] [string]$attrDomainName = '.domain.local'
 )
 
 Set-StrictMode -Version latest
@@ -85,15 +91,42 @@ Function Install-ZabbixAgent () {
     [CmdletBinding()] Param  (
         [Parameter(Mandatory = $true,valueFromPipeline=$true)] [string]$attrServername
         ,[Parameter(Mandatory = $true,valueFromPipeline=$true)] [string]$attrZabbixServer
+        ,[Parameter(Mandatory = $true,valueFromPipeline=$true)] [string]$attrFileMSI
+		,[Parameter(Mandatory = $true,valueFromPipeline=$true)] [string]$attrDomainName
     )
+    
+    # copy MSI to local
+    Try {
+        $msiFile = $attrFileMSI.Split('\')[-1]
+        $localTemp = '\\' + $attrServername + '\c$\temp\'
+        $localMSI =  $localTemp +$msiFile
+        If (! (Test-Path $localTemp)) {
+            New-Item -Path $localTemp -ItemType Directory | Out-Null
+        }
+        Copy-Item $attrFileMSI $localMSI
+    } Catch {
+        Write-Host "[Error]: Cannot copy MSI to server : $($Error[0])"
+        Return -1
+    }
 
-    $hostname = "$attrServername".ToUpper()
-    $arguments = "\\$attrServername -d -s msiexec /i $attrFileMSI /l*v c:\zabbix_agent_install_log.txt /qn SERVER=$attrZabbixServer SERVERACTIVE=$attrZabbixServer HOSTNAME=$hostname"
-    $remoteInstall = Start-Process .\PsExec64.exe -ArgumentList $arguments -Wait -PassThru
-    $handle = $remoteInstall.Handle
-    $remoteInstall.WaitForExit();
-    $exitCode = $remoteInstall.ExitCode
-    Return $exitCode
+    $hostname = "$attrServername".ToUpper() + $attrDomainName
+    $arguments = "/i $localMSI /l*v c:\zabbix_agent_install_log.txt /qn SERVER=$attrZabbixServer SERVERACTIVE=$attrZabbixServer HOSTNAME=$hostname"
+    $install = Invoke-Command -ComputerName $attrServername -ScriptBlock {
+        param ($arguments)
+        Try {
+            $ExitCode = (Start-Process msiexec.exe -ArgumentList $arguments -Wait -PassThru).ExitCode
+            Return $ExitCode
+        } Catch {
+            Return -1
+        }
+       } -ArgumentList $arguments -AsJob
+    Wait-Job -Job $install | Out-Null
+    $ReturnValue = Receive-Job -Job $install
+
+    # delete MSI
+    Remove-Item -Path $localMSI
+
+    Return $ReturnValue
 }
 #end region
 
@@ -128,7 +161,7 @@ If ($isZabbixAgent) {
         add-Log -attrText "[Info]; Installed version not eque MSI version ($MSIVersion -> $InstalledVersion)"
         add-Log -attrText "[Info]; Uninstall Zabbix agent on $attrServername ($InstalledVersion)"
         Try {
-            $remoteCommand = Invoke-Command -ComputerName $attrServername -Authentication Kerberos -ScriptBlock {Get-Package -Name "Zabbix*" |  Uninstall-Package -Force}
+            $remoteCommand = Invoke-Command -ComputerName $attrServername -Authentication Kerberos -ScriptBlock {Get-Package -Name "Zabbix*" |  Uninstall-Package -Force }
         } Catch {
             add-Log -attrText "[Error]; Cannot uninstall Zabbix agent on $attrServername ($InstalledVersion); $($Error[0])"
             add-Log -attrText "[Info]; End"
@@ -137,9 +170,10 @@ If ($isZabbixAgent) {
 
         # install MSI agent Zabbix
         add-Log -attrText "[Info]; Install Zabbix agent on $attrServername ($MSIVersion)"
-        $installAgent = Install-ZabbixAgent -attrServername $attrServername -attrZabbixServer $attrZabbixServer
+        $installAgent = Install-ZabbixAgent -attrServername $attrServername -attrZabbixServer $attrZabbixServer -attrFileMSI $attrFileMSI -attrDomainName $attrDomainName
         If ($installAgent -ne 0) {
             add-Log -attrText "[Error]; Error when installed Zabbix agent on $attrServername ($MSIVersion); Error code $installAgent"
+            Exit
         }
     } Else {
         add-Log -attrText "[Info]; Zabbix agent is already installed - $InstalledVersion"
@@ -148,23 +182,26 @@ If ($isZabbixAgent) {
 
     # install MSI agent Zabbix
     add-Log -attrText "[Info]; Install Zabbix agent on $attrServername ($MSIVersion)"
-    $installAgent = Install-ZabbixAgent -attrServername $attrServername -attrZabbixServer $attrZabbixServer
+    $installAgent = Install-ZabbixAgent -attrServername $attrServername -attrZabbixServer $attrZabbixServer -attrFileMSI $attrFileMSI -attrDomainName $attrDomainName
     If ($installAgent -ne 0) {
         add-Log -attrText "[Error]; Error when installed Zabbix agent on $attrServername ($MSIVersion); Error code $installAgent"
+        Exit
     }
+
+  Write-Verbose "[Info]; Wait 20 sec"
+  Start-Sleep -s 20
 }
 
-Write-Verbose "[Info]; Wait 20 sec"
-Start-Sleep -s 20
+
 
 # update config files
 add-Log -attrText "[Info]; Test path $attrZabbixConfigFiles"
 If (Test-Path -Path $attrZabbixConfigFiles) {
-    add-Log -attrText "[Info]; Copy config path $attrZabbixConfigFiles"
-    Copy-Item -Path "$attrZabbixConfigFiles\*.*" -Destination "\\$($attrServername)\c$\Program Files\Zabbix Agent\zabbix_agentd.conf.d\" -Force -Confirm:$False
+    add-Log -attrText "[Info]; Copy config path $attrZabbixConfigFiles -> \\$($attrServername)\c$\Program Files\Zabbix Agent 2\zabbix_agent2.d\"
+    Copy-Item -Path "$attrZabbixConfigFiles\*.*" -Destination "\\$($attrServername)\c$\Program Files\Zabbix Agent 2\zabbix_agent2.d\" -Force -Confirm:$False
     
     add-Log -attrText "[Info]; Restart Zabbix agent on $attrServername"
-    $remoteCommand = Invoke-Command -ComputerName $attrServername -Authentication Kerberos -ScriptBlock {Restart-Service -Name "Zabbix Agent"}
+    $remoteCommand = Invoke-Command -ComputerName $attrServername -Authentication Kerberos -ScriptBlock {Restart-Service -Name "Zabbix Agent 2"}
 } Else {
     add-Log -attrText "[Info]; Path $attrZabbixConfigFiles doesnt exist"
 }
