@@ -1,16 +1,21 @@
 <#
 .SYNOPSIS
+	Meni nastaveni v Zabbix conf souborech na klientech
 .DESCRIPTION
 .NOTES
 .LINK
 .EXAMPLE
-.PARAMETER foo
-.PARAMETER bar
+	./change-ZabbixConf.ps1 -verbose -attrComputers "server1","server2"
+.PARAMETER attrComputers
+	Jmeno nebo jmena serveru 
 #>
 
 [CmdletBinding()]Param (
     [Parameter(Mandatory=$False)]  [array]$attrComputers
 )
+
+# mozna pouzit i soubor se jmeny serveru
+#$attrComputers = Get-Content C:\ac\server.css
 
 ForEach ($computer in $attrComputers) {
 

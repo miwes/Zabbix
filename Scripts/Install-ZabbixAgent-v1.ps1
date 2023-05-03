@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-	Install Zabbix Agent MSI Remote
+	Install Zabbix Agent MSI Remote - urceno pro verzi Zabbix agenta v1
 .DESCRIPTION
 	Version :
 		1.0 - Initial realease
