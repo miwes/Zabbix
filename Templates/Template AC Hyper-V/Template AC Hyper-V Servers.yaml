@@ -1,0 +1,585 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-05-03T17:28:18Z'
+  groups:
+    -
+      uuid: 02e4df4f20b848e79267641790f241da
+      name: Templates/Virtualization
+  templates:
+    -
+      uuid: 86b168a8cf844ef4bf1d1530acabb5e3
+      template: 'Template AC Hyper-V Servers'
+      name: 'Template AC Hyper-V Servers'
+      description: |
+        Requirements 
+        - Zabbix Server 4.4
+        - Zabbix Agent v2
+        
+        Version 5.1
+         - discovery over WMI
+         - no external scripts
+      groups:
+        -
+          name: Templates/Virtualization
+      items:
+        -
+          uuid: f12f019a5c414419baf66a6b7251f812
+          name: 'Hyper-V Hypervisor Logical Processor(_Total)'
+          key: 'perf_counter["\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time"]'
+          delay: '30'
+          value_type: FLOAT
+          units: '%'
+          description: 'https://msdn.microsoft.com/en-us/library/cc768535%28v=bts.10%29.aspx?f=255&MSPPError=-2147217396'
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+          triggers:
+            -
+              uuid: cec8f976164e4a27a133a705e7732593
+              expression: 'min(/Template AC Hyper-V Servers/perf_counter["\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time"],3600s)>80'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'min(/Template AC Hyper-V Servers/perf_counter["\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time"],600s)<80'
+              name: 'Host Parent Partition CPU Utilization'
+              priority: WARNING
+            -
+              uuid: 71909688916245db83beca2fbc622f37
+              expression: 'min(/Template AC Hyper-V Servers/perf_counter["\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time"],3600s)>90'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'min(/Template AC Hyper-V Servers/perf_counter["\Hyper-V Hypervisor Logical Processor(_Total)\% Total Run Time"],600s)<90'
+              name: 'Host Parent Partition CPU Utilization'
+              priority: HIGH
+        -
+          uuid: cc459286d8ab4ce1acb6510e14d4e84d
+          name: 'Hyper-V Hypervisor Virtual Processor Guest (Total)'
+          key: 'perf_counter["\Hyper-V Hypervisor Virtual Processor(_Total)\% Guest Run Time"]'
+          delay: '30'
+          value_type: FLOAT
+          units: '%'
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+        -
+          uuid: 8b63253fbec24ddab3a169a301a1231d
+          name: 'Hyper-V Hypervisor Virtual Processor Hypervisor(Total)'
+          key: 'perf_counter["\Hyper-V Hypervisor Virtual Processor(_Total)\% Hypervisor Run Time"]'
+          delay: '30'
+          value_type: FLOAT
+          units: '%'
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+        -
+          uuid: 45337fdb275b425f822ec63b06123f5a
+          name: 'Hyper-V Number of Logical CPUs'
+          key: 'perf_counter[\Hyper-V Hypervisor\Logical Processors]'
+          delay: '30'
+          units: Core
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+        -
+          uuid: 036df834a24849eaa7eb66cb1cc614c4
+          name: 'Hyper-V Number of Virtual CPUs'
+          key: 'perf_counter[\Hyper-V Hypervisor\Virtual Processors]'
+          delay: '30'
+          units: Core
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+        -
+          uuid: a7b9e3be15c44c0e871afd842dfa6142
+          name: 'Hyper-V Virtual Machine Health - Critical'
+          key: 'perf_counter[\Hyper-V Virtual Machine Health Summary\Health Critical]'
+          delay: '30'
+          units: VM
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+          triggers:
+            -
+              uuid: 48396a6844a149b481344150bf812d11
+              expression: 'last(/Template AC Hyper-V Servers/perf_counter[\Hyper-V Virtual Machine Health Summary\Health Critical],#2)>0'
+              name: 'Hyper-V VM Critical state'
+              priority: HIGH
+        -
+          uuid: 3102c2a2761d4c209ff65511034c274d
+          name: 'Hyper-V Virtual Machine Health - OK'
+          key: 'perf_counter[\Hyper-V Virtual Machine Health Summary\Health Ok]'
+          delay: '30'
+          units: VM
+          request_method: POST
+          tags:
+            -
+              tag: Application
+              value: Hyper-V
+        -
+          uuid: 4efd9f8e8c124bae9a7db0a0dfbf78cf
+          name: 'Number of VM'
+          key: 'wmi.getall["root\virtualization\v2","Select Caption from Msvm_ComputerSystem"]'
+          delay: 1h
+          history: 7d
+          units: VM
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  const jsonData = JSON.parse(value);
+                  return Object.keys(jsonData).length;
+        -
+          uuid: 7de9d2f5bb71459a94129fdfd8c53efb
+          name: 'RAW - Hyper-V Snapshots'
+          key: 'wmi.getall[root\virtualization\v2,"SELECT Antecedent FROM Msvm_SnapshotOfVirtualSystem"]'
+          delay: 12h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: Application
+              value: 'Hyper-V VM Snapshots'
+      discovery_rules:
+        -
+          uuid: 7604600f122b416dab1ee0aa2ec4893b
+          name: 'Hyper-V VM'
+          key: 'wmi.getall["root\virtualization\v2","Select * from Msvm_ComputerSystem WHERE Caption = ''Virtual Machine''"]'
+          delay: 1h
+          lifetime: 2d
+          description: 'https://docs.microsoft.com/en-us/windows/win32/hyperv_v2/msvm-summaryinformation'
+          item_prototypes:
+            -
+              uuid: 4744e6f5240649e4b1e6fb6268822782
+              name: '{#VMNAME} snapshots'
+              type: DEPENDENT
+              key: 'vm.snaphots[{#VMNAME}]'
+              delay: '0'
+              history: 7d
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var count = (value.match(/{#VMID}/g) || []).length;
+                      return count;
+              master_item:
+                key: 'wmi.getall[root\virtualization\v2,"SELECT Antecedent FROM Msvm_SnapshotOfVirtualSystem"]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM Snapshots'
+              trigger_prototypes:
+                -
+                  uuid: 2c064afa43a64814a486f081689bc06c
+                  expression: 'min(/Template AC Hyper-V Servers/vm.snaphots[{#VMNAME}],{$VM_SNAPSHOT_WARNING_DAY})<>0'
+                  name: '{#VMNAME} snaphshots exists longer than {$VM_SNAPSHOT_WARNING_DAY}'
+                  priority: WARNING
+            -
+              uuid: e93b2775d49646d78727afbd1c31754b
+              name: 'Status {#VMNAME}'
+              type: DEPENDENT
+              key: 'vm.status[{#VMNAME}]'
+              delay: '0'
+              trends: '0'
+              valuemap:
+                name: Msvm_SummaryInformation-Heartbeat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.Heartbeat
+              master_item:
+                key: 'wmi.getall[root\virtualization\v2,"SELECT UpTime, Heartbeat FROM Msvm_SummaryInformation WHERE elementname=''{#VMNAME}''"]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM'
+              trigger_prototypes:
+                -
+                  uuid: ce1689c5ba9f4c9dbbe87bd7d97e50ee
+                  expression: 'last(/Template AC Hyper-V Servers/vm.status[{#VMNAME}])<>2'
+                  name: '{#VMNAME} virtual machine status - {ITEM.LASTVALUE1}'
+                  priority: HIGH
+                  manual_close: 'YES'
+            -
+              uuid: a82c9151484b4a38ae27ada4ac0c06b9
+              name: 'Uptime {#VMNAME}'
+              type: DEPENDENT
+              key: 'vm.uptime[{#VMNAME}]'
+              delay: '0'
+              trends: '0'
+              status: DISABLED
+              discover: NO_DISCOVER
+              units: s
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.UpTime
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'wmi.getall[root\virtualization\v2,"SELECT UpTime, Heartbeat FROM Msvm_SummaryInformation WHERE elementname=''{#VMNAME}''"]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM'
+            -
+              uuid: 53704e46058846a9a6323ba047779251
+              name: 'RAW data {#VMNAME}'
+              key: 'wmi.getall[root\virtualization\v2,"SELECT UpTime, Heartbeat FROM Msvm_SummaryInformation WHERE elementname=''{#VMNAME}''"]'
+              history: '0'
+              trends: '0'
+              status: DISABLED
+              discover: NO_DISCOVER
+              value_type: TEXT
+              preprocessing:
+                -
+                  type: TRIM
+                  parameters:
+                    - '[]'
+                -
+                  type: TRIM
+                  parameters:
+                    - '[]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM'
+          lld_macro_paths:
+            -
+              lld_macro: '{#VMID}'
+              path: $.Name
+            -
+              lld_macro: '{#VMNAME}'
+              path: $.ElementName
+        -
+          uuid: 5771bff4a6f34ce7bfb4636af8cd52ac
+          name: 'Hyper-V VM Memory'
+          key: 'wmi.getall[root\cimv2,SELECT Name FROM Win32_PerfRawData_BalancerStats_HyperVDynamicMemoryVM]'
+          status: DISABLED
+          item_prototypes:
+            -
+              uuid: 8eeb0c917af6490bad6f6524951125ee
+              name: 'Hyper-V VM Memory Pressure - {#INSTANCE}'
+              key: 'perf_counter[\Hyper-V Dynamic Memory VM({#INSTANCE})\Average Pressure]'
+              delay: 5m
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM Memory'
+              trigger_prototypes:
+                -
+                  uuid: 53fe33fefd2f4a2983c2ad6dda4f2825
+                  expression: 'last(/Template AC Hyper-V Servers/perf_counter[\Hyper-V Dynamic Memory VM({#INSTANCE})\Average Pressure],#10)>{$VM_MEMORY_PRESSURE_THRESHOLD}'
+                  name: 'High VM Memory Pressure > {$VM_MEMORY_PRESSURE_THRESHOLD}% - {#INSTANCE}'
+                  priority: WARNING
+                  manual_close: 'YES'
+          lld_macro_paths:
+            -
+              lld_macro: '{#INSTANCE}'
+              path: $.Name
+        -
+          uuid: bb6664092b4647df8c3970e2f7e4d12a
+          name: 'Hyper-V Cluster Shared Volumes Performance'
+          key: 'wmi.getall[root\cimv2,SELECT Name FROM Win32_PerfRawData_CsvFsPerfProvider_ClusterCSVFS]'
+          delay: 1h
+          filter:
+            conditions:
+              -
+                macro: '{#INSTANCE}'
+                value: _Total
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+          item_prototypes:
+            -
+              uuid: 734b6329c70541aab3db824553d8c793
+              name: '{#INSTANCE} CSV Read Latency'
+              key: 'perf_counter[\Cluster CSV File System({#INSTANCE})\Read Latency]'
+              delay: '30'
+              value_type: FLOAT
+              units: s
+              request_method: POST
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV'
+            -
+              uuid: e34f68703f2443dd8ab696d5071464f9
+              name: '{#INSTANCE} CSV Write Latency'
+              key: 'perf_counter[\Cluster CSV File System({#INSTANCE})\Write Latency]'
+              delay: '30'
+              value_type: FLOAT
+              units: s
+              request_method: POST
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV'
+            -
+              uuid: c75d7f7b1e294f1c8e54d46fb8c3856d
+              name: '{#INSTANCE} Cache Size - Configured'
+              key: 'perf_counter[\Cluster CSV Volume Cache({#INSTANCE})\Cache Size - Configured]'
+              history: 1d
+              units: B
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV Cache'
+            -
+              uuid: ad90eb248e5d44c6880355a97abfe3aa
+              name: '{#INSTANCE} Cache Size - Current'
+              key: 'perf_counter[\Cluster CSV Volume Cache({#INSTANCE})\Cache Size - Current]'
+              history: 1d
+              units: B
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV Cache'
+            -
+              uuid: 40b48af42d7642f09b1defed15c7d16e
+              name: '{#INSTANCE} Cache Size - State'
+              key: 'perf_counter[\Cluster CSV Volume Cache({#INSTANCE})\Cache State]'
+              history: 1d
+              valuemap:
+                name: 'Hyper-V CSV Cache State'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV Cache'
+          request_method: POST
+          lld_macro_paths:
+            -
+              lld_macro: '{#INSTANCE}'
+              path: $.Name
+        -
+          uuid: a140b1ca63054263a8fc7dec01ba3adc
+          name: 'Hyper-V VM CPU'
+          key: 'wmi.getall[root\cimv2,SELECT Name FROM Win32_PerfRawData_HvStats_HyperVHypervisorVirtualProcessor]'
+          delay: 1h
+          status: DISABLED
+          filter:
+            conditions:
+              -
+                macro: '{#INSTANCE}'
+                value: '[^_Total]'
+                formulaid: A
+          lifetime: 2d
+          item_prototypes:
+            -
+              uuid: ea9a9eabee4d411e994fec1f7c885cab
+              name: 'Hyper-V VM CPU - {#INSTANCE}'
+              key: 'perf_counter[\Hyper-V Hypervisor Virtual Processor({#INSTANCE})\% Total Run Time]'
+              value_type: FLOAT
+              request_method: POST
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM CPU'
+                -
+                  tag: Application
+                  value: 'Virtual Machine'
+              trigger_prototypes:
+                -
+                  uuid: 6b2cfa6a7f7546e991fee0f79c963021
+                  expression: 'avg(/Template AC Hyper-V Servers/perf_counter[\Hyper-V Hypervisor Virtual Processor({#INSTANCE})\% Total Run Time],60m)>{$VM_CPU_TRESHOLD}'
+                  name: 'High VM CPU usage - {#INSTANCE} (over {$VM_CPU_TRESHOLD}% avg 60m)'
+                  priority: AVERAGE
+          request_method: POST
+          lld_macro_paths:
+            -
+              lld_macro: '{#INSTANCE}'
+              path: $.Name
+        -
+          uuid: cd54ac6a1a4840cba7d4dc23c9f0f2ec
+          name: 'Hyper-V VM Network'
+          key: 'wmi.getall[root\cimv2,SELECT Name FROM Win32_PerfRawData_NvspNicStats_HyperVVirtualNetworkAdapter]'
+          delay: 1h
+          status: DISABLED
+          filter:
+            conditions:
+              -
+                macro: '{#INSTANCE}'
+                value: 'Network Adapter'
+                formulaid: A
+          lifetime: 2d
+          item_prototypes:
+            -
+              uuid: b588c9acb14e4640b3b67185debb09ac
+              name: 'Hyper-V VM Network - {#INSTANCE}'
+              key: 'perf_counter[\Hyper-V Virtual Network Adapter({#INSTANCE})\Bytes/sec]'
+              value_type: FLOAT
+              units: Bytes
+              request_method: POST
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V VM Network'
+                -
+                  tag: Application
+                  value: 'Virtual Machine'
+              trigger_prototypes:
+                -
+                  uuid: 4b3eba0d8a1e4f1c914707b3589a77b3
+                  expression: 'avg(/Template AC Hyper-V Servers/perf_counter[\Hyper-V Virtual Network Adapter({#INSTANCE})\Bytes/sec],30m)>{$VM_NETWORK_TRESHOLD}'
+                  name: 'High VM Net > {$VM_NETWORK_TRESHOLD} - {#INSTANCE}'
+                  priority: WARNING
+          request_method: POST
+          lld_macro_paths:
+            -
+              lld_macro: '{#INSTANCE}'
+              path: $.Name
+        -
+          uuid: 0d1d28f6b62a458795ec3dcc90390a51
+          name: 'Hyper-V Cluster Shared Volumes'
+          key: 'wmi.getall[root\MSCluster,"SELECT Name FROM MSCluster_ClusterSharedVolume"]'
+          item_prototypes:
+            -
+              uuid: 910a0ff027d2486f8b38016154e2bf4c
+              name: '{#CSVNAME} Backup State'
+              type: DEPENDENT
+              key: 'hyperv.csv.backupstate[{#CSVNAME}]'
+              delay: '0'
+              valuemap:
+                name: MSCluster_ClusterSharedVolume-BackupState
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.BackupState
+              master_item:
+                key: 'wmi.getall[root\MSCluster,"SELECT * FROM MSCluster_ClusterSharedVolume WHERE Name = ''{#CSVNAME}''"]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV'
+            -
+              uuid: a1a32d62c0924b1d80d32b67bf886c5c
+              name: '{#CSVNAME} Fault State'
+              type: DEPENDENT
+              key: 'hyperv.csv.faultstate[{#CSVNAME}]'
+              delay: '0'
+              valuemap:
+                name: MSCluster_ClusterSharedVolume-FaulState
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.FaultState
+              master_item:
+                key: 'wmi.getall[root\MSCluster,"SELECT * FROM MSCluster_ClusterSharedVolume WHERE Name = ''{#CSVNAME}''"]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV'
+              trigger_prototypes:
+                -
+                  uuid: f38d5e31869342c3a8d4f67a2d30147d
+                  expression: 'last(/Template AC Hyper-V Servers/hyperv.csv.faultstate[{#CSVNAME}])<>0'
+                  name: '{#CSVNAME} fault state - {ITEM.LASTVALUE1}'
+                  manual_close: 'YES'
+            -
+              uuid: 9d3a66dc23184b3ea11fd9696bc36c99
+              name: 'RAW data {#CSVNAME}'
+              key: 'wmi.getall[root\MSCluster,"SELECT * FROM MSCluster_ClusterSharedVolume WHERE Name = ''{#CSVNAME}''"]'
+              delay: 5m
+              history: '0'
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                -
+                  type: TRIM
+                  parameters:
+                    - '[]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Hyper-V CSV'
+          lld_macro_paths:
+            -
+              lld_macro: '{#CSVNAME}'
+              path: $.Name
+      macros:
+        -
+          macro: '{$VM_CPU_TRESHOLD}'
+          value: '90'
+          description: 'Usage CPU in %'
+        -
+          macro: '{$VM_MEMORY_PRESSURE_THRESHOLD}'
+          value: '110'
+          description: 'Memory pressure in %'
+        -
+          macro: '{$VM_NETWORK_TRESHOLD}'
+          value: 100M
+          description: 'Network usage (30minutes)'
+        -
+          macro: '{$VM_SNAPSHOT_WARNING_DAY}'
+          value: 1d
+          description: 'Max old snapshots'
+      valuemaps:
+        -
+          uuid: 915eac8e9fa748b7b2d1836cecb4a3a7
+          name: 'Hyper-V CSV Cache State'
+          mappings:
+            -
+              value: '1'
+              newvalue: Enable
+            -
+              value: '0'
+              newvalue: Disable
+        -
+          uuid: 3bca00f7f9274bf3b0398cdfcfd81af4
+          name: MSCluster_ClusterSharedVolume-BackupState
+          mappings:
+            -
+              value: '0'
+              newvalue: None
+            -
+              value: '1'
+              newvalue: 'In Progress'
+        -
+          uuid: 1aae7dba806c43a0bc1860459c1e8931
+          name: MSCluster_ClusterSharedVolume-FaulState
+          mappings:
+            -
+              value: '0'
+              newvalue: 'No Faults'
+            -
+              value: '1'
+              newvalue: 'Redirected Access'
+            -
+              value: '2'
+              newvalue: 'No Access'
+            -
+              value: '4'
+              newvalue: 'In Maintenance'
+        -
+          uuid: 9990237c75ba4bc4a7fcd00c028465c2
+          name: Msvm_SummaryInformation-Heartbeat
+          mappings:
+            -
+              value: '2'
+              newvalue: OK
+            -
+              value: '6'
+              newvalue: Error
+            -
+              value: '12'
+              newvalue: 'No Contact'
+            -
+              value: '13'
+              newvalue: 'Lost Communication'
