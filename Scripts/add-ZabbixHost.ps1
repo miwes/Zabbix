@@ -11,7 +11,7 @@
 #>
 
 [CmdletBinding()]Param (
-     [Parameter(Mandatory=$False)]  [string]$attrURL = "https://monitoring.acdohled.cz/api_jsonrpc.php"
+     [Parameter(Mandatory=$False)]  [string]$attrURL = "https://zabbix/api_jsonrpc.php"
 	,[Parameter(Mandatory=$False)]  [string]$attrZabbixUser = "ac.weis"
 	,[Parameter(Mandatory=$False)]  [string]$attrHostCSV = "C:\Work\Zabbix\mpp.csv"
 	,[Parameter(Mandatory=$true)] 	[string]$attrGroupID
