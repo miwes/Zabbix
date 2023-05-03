@@ -1,0 +1,48 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-05-03T06:33:01Z'
+  groups:
+    -
+      uuid: 2a3da004466e4a1c95375da958b32130
+      name: AC-template-group
+  templates:
+    -
+      uuid: 2aadb3994709413f9e02ce55daaa8b91
+      template: AC-template-external-monitoring
+      name: AC-template-external-monitoring
+      description: |
+        AC (Michal Weis)
+        Version : 
+        1.0 - vytvoreni sablony
+        
+        Last update 19.4.2022
+      groups:
+        -
+          name: AC-template-group
+      items:
+        -
+          uuid: 96dd7cbb0211499eafab2c06549b52e7
+          name: Problems
+          type: TRAP
+          key: firma.problems
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          allowed_hosts: '{HOST.IP}'
+          triggers:
+            -
+              uuid: 11858e9b4a074d48b89de882eb267ee3
+              expression: 'find(/AC-template-external-monitoring/firma.problems,,"regexp","\[NEW\]")=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'find(/AC-template-external-monitoring/firma.problems,,"regexp","\[CLOSED\]")=1'
+              correlation_mode: TAG_VALUE
+              correlation_tag: Problem
+              name: '{HOSTNAME} - {ITEM.LASTVALUE1}'
+              priority: WARNING
+              type: MULTIPLE
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: Problem
+                  value: '{{ITEM.VALUE}.regsub("- (.+)","\1")}'
