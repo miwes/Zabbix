@@ -16,9 +16,13 @@ zabbix_server -Rlog_level_decrease="vmware collector"
 Seznam procesu pooleru (jejich stav)
 ------------------------------------
 ps aux | grep zabbix_server
+
 watch -n 0.2 ps -fu zabbix
+
 watch -tn 0.2 'ps -fC zabbix_server | grep history'
+
 watch -tn 0.2 'ps -fC zabbix_server | grep poller'
+
 
 Pustit jako zabbix identita pro otestovani
 ------------------------------------------
