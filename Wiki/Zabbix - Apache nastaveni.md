@@ -48,7 +48,7 @@ Zapnuti HTST
 ```
 3. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
 ```
-	nano etc/apache2/sites-enabled/000-default-ssl.conf
+	nano /etc/apache2/sites-enabled/000-default-ssl.conf
 ```
 ```
 	Header set Strict-Transport-Security "max-age=31536000"
