@@ -25,27 +25,35 @@ Apache zapnuti SSL
 
 Presmerovani na HTTPs
 ----------------------
-1. Zapnut rewrite modulu 
+1. Zapnut rewrite modulu
+```
 	sudo a2enmod rewrite
+```
 
-2. Pridat presmerovani do configu 000-default.conf do 80 virtualhost
+3. Pridat presmerovani do configu 000-default.conf do 80 virtualhost
+```
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}
+```
 
 Zapnuti HTST
 ------------
-1. Zapnuti modulu 
+1. Zapnuti modulu
+```
 	sudo a2enmod headers
-2. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
+```
+3. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
+```
 	Header set Strict-Transport-Security "max-age=31536000"
-
+```
 Vypnuti signature
 -----------------
-1. Pridat konfiguraci do /etc/apache2/conf-enabled/security.conf 
+1. Pridat konfiguraci do /etc/apache2/conf-enabled/security.conf
+```
 	ServerSignature Off 
 	ServerTokens Prod
-
+```
 
 Zabbix na root webu
 ----------------------
