@@ -3,19 +3,25 @@ Apache zapnuti SSL
 1. sudo mkdir /etc/apache2/ssl
 
 2. Vytvoreni selfsigned certifikatu
+```
 	sudo openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -out /etc/apache2/ssl/server.crt -keyout /etc/apache2/ssl/server.key
-
-3. zapnuti podpory SSL na Apache serveru
+```
+4. zapnuti podpory SSL na Apache serveru
+```
 	sudo a2enmod ssl
-
-4. Vytvoreni symbolicke
+```
+5. Vytvoreni symbolicke
+```
 	sudo ln -s /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-enabled/000-default-ssl.conf
+```
 
-5. Uprava config souboru /etc/apache2/sites-enabled/000-default-ssl.conf
+6. Uprava config souboru /etc/apache2/sites-enabled/000-default-ssl.conf
+```
 	SSLCertificateFile    /etc/apache2/ssl/server.crt
-	SSLCertificateKeyFile /etc/apache2/ssl/server.key	
+	SSLCertificateKeyFile /etc/apache2/ssl/server.key
+```
 
-6. Restart Apache
+7. Restart Apache
 
 Presmerovani na HTTPs
 ----------------------
