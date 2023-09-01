@@ -32,6 +32,9 @@ Presmerovani na HTTPs
 
 3. Pridat presmerovani do configu 000-default.conf do 80 virtualhost
 ```
+	nano /etc/apache2/sites-enabled/000-default.conf
+```
+```
 	RewriteEngine On
 	RewriteCond %{HTTPS} off
 	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}
@@ -45,11 +48,17 @@ Zapnuti HTST
 ```
 3. Pridani konfigurace do etc/apache2/sites-enabled/000-default-ssl.conf
 ```
+	etc/apache2/sites-enabled/000-default-ssl.conf
+```
+```
 	Header set Strict-Transport-Security "max-age=31536000"
 ```
 Vypnuti signature
 -----------------
 1. Pridat konfiguraci do /etc/apache2/conf-enabled/security.conf
+```
+	nano /etc/apache2/conf-enabled/security.conf
+```
 ```
 	ServerSignature Off 
 	ServerTokens Prod
@@ -58,7 +67,17 @@ Vypnuti signature
 Zabbix na root webu
 ----------------------
 1. Editovat /etc/apache2/sites-available/000-default.conf i SSL
+```
+	nano /etc/apache2/sites-available/000-default.conf
+	nano /etc/apache2/sites-available/000-default-ssl.conf
+```
+```
 	/var/www/html zmenit na /usr/share/zabbix
+```
 	
-2. Editovat /etc/apache2/conf-available/zabbix.conf
-	Zakomentovat # Alias /zabbix /usr/share/zabbix
+3. Editovat /etc/apache2/conf-available/zabbix.conf
+```
+	nano /etc/apache2/conf-available/zabbix.conf
+```
+Zakomentovat # Alias /zabbix /usr/share/zabbix
+
