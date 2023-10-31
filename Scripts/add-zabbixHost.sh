@@ -1,6 +1,8 @@
 #!/bin/bash
  IP=$1  
  HOST_NAME=$2  
+ HOSTGROUPID=$3
+ TEMPLATEID=$4
  
  # CONSTANT VARIABLES  
  ERROR='0'  
@@ -8,8 +10,6 @@
  ZABBIX_PASS='zabbix' 
  ZABBIX_SERVER='smon' 
  API='https://smon/api_jsonrpc.php'  
- HOSTGROUPID=20 
- TEMPLATEID=10186 
  
  # Authenticate with Zabbix API    
  authenticate() {  
