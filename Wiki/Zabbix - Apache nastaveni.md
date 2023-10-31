@@ -1,8 +1,11 @@
 Apache zapnuti SSL
 ----------------------
-1. sudo mkdir /etc/apache2/ssl
+1. Vytvor adresar
+```
+sudo mkdir /etc/apache2/ssl
+```
 
-2. Vytvoreni selfsigned certifikatu
+3. Vytvoreni selfsigned certifikatu
 ```
 	sudo openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -out /etc/apache2/ssl/server.crt -keyout /etc/apache2/ssl/server.key
 ```
