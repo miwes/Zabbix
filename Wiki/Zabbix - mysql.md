@@ -15,7 +15,7 @@ LIMIT 10;
 # top hosti
 ```
 SELECT p.host, h.itemid, i.key_, count(*) AS cnt
-FROM history h, items i, hosts p
+FROM history_uint h, items i, hosts p
 WHERE h.itemid = i.itemid AND i.hostid = p.hostid
 GROUP BY h.itemid
 ORDER BY cnt DESC;
