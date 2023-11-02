@@ -12,6 +12,14 @@ WHERE TABLE_SCHEMA = "zabbix"
 ORDER BY (DATA_LENGTH + INDEX_LENGTH) DESC
 LIMIT 10;
 ```
+# top hosti
+```
+SELECT p.host, h.itemid, i.key_, count(*) AS cnt
+FROM history h, items i, hosts p
+WHERE h.itemid = i.itemid AND i.hostid = p.hostid
+GROUP BY h.itemid
+ORDER BY cnt DESC;
+```
 # nejvic zaznamu 
 ```
 SELECT 
