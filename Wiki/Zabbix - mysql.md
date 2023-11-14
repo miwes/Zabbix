@@ -1,8 +1,8 @@
-#Pripojeni k mysql
+# Pripojeni k mysql
 ```
 mysql -u root -p zabbix
 ```
-#Velikost dat:
+# Velikost dat:
 ```
 SELECT
   TABLE_NAME,
@@ -57,4 +57,14 @@ order by data_free_mb;
 # optimalizace (uvolneni) tabulky od smazanych dat
 ```
 optimize table history_uint;
+```
+
+# Kontrola a nastaveni innodb cache size
+```
+SELECT @@innodb_buffer_pool_size/1024/1024/1024;
+```
+## nastaveni velikosti cache v MySQL
+```
+innodb_buffer_pool_size=4G
+```
 ```
