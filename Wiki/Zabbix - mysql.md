@@ -65,6 +65,9 @@ SELECT @@innodb_buffer_pool_size/1024/1024/1024;
 ```
 ## nastaveni velikosti cache v MySQL
 ```
+nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+```
 innodb_buffer_pool_size=4G
 ```
 ```
