@@ -1,6 +1,6 @@
 Najdi ve vsech souborech string
 -------------------------------
-grep -r "Mar 14 01:07*" .
+grep -r "Mar 14 01:0[5-9]*" .
 
 Totalni zabiti procesu
 ------------------------
