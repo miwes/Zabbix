@@ -1,3 +1,7 @@
+Najdi ve vsech souborech string
+-------------------------------
+grep -r "Mar 14 01:07*" .
+
 Totalni zabiti procesu
 ------------------------
 killall zabbix_server -s SIGKILL
