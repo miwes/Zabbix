@@ -1,3 +1,7 @@
+Totalni zabiti procesu
+------------------------
+killall zabbix_server -s SIGKILL
+
 Rucni spusteni Housekeeperu
 ----------------------------
 zabbix_server -c /etc/zabbix/zabbix_server.conf -R housekeeper_execute
