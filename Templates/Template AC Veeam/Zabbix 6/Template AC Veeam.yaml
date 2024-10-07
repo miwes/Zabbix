@@ -1,0 +1,202 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-10-07T12:34:30Z'
+  groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: d65f8dfe1cb240cf8bd48f15445e63da
+      template: 'Template AC Veeam'
+      name: 'Template AC Veeam'
+      description: |
+        Version 1.1
+         - convert to XML
+      groups:
+        - name: Templates/Applications
+      items:
+        - uuid: e24d0fd0d2be447593cd5f7b04e27073
+          name: 'RAW Veeam Jobs Last Session'
+          key: veeam.jobs
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            - tag: Application
+              value: Veeam
+      discovery_rules:
+        - uuid: 96a348d5131a4633ad9f34d6eabfa6e1
+          name: 'Discovery Veeam Jobs'
+          key: veeam.jobsDiscovery
+          delay: 1h
+          lifetime: 7d
+          item_prototypes:
+            - uuid: bd82f417ccbe4390a97a1f93f496f43c
+              name: 'Last run {#BACKUPJOBNAME}'
+              type: DEPENDENT
+              key: veeam.job.lastrun
+              delay: '0'
+              history: 30d
+              trends: '0'
+              value_type: TEXT
+              description: '{#BACKUPJOBDESCRIPTION}'
+              preprocessing:
+                - type: XMLPATH
+                  parameters:
+                    - '//Object[@Type=''Veeam.Backup.Core.CBackupSession'']/Property[@Name=''JobId'' and text()=''{#BACKUPJOBID}'']/following-sibling::Property[@Name=''EndTime'']/text()'
+              master_item:
+                key: veeam.jobs
+              tags:
+                - tag: Application
+                  value: Veeam
+            - uuid: 554c75d36d4b403381a6c26589db659f
+              name: 'Status {#BACKUPJOBNAME}'
+              type: DEPENDENT
+              key: veeam.job.status
+              delay: '0'
+              history: 30d
+              description: '{#BACKUPJOBDESCRIPTION}'
+              valuemap:
+                name: 'Veeam Job status'
+              preprocessing:
+                - type: XMLPATH
+                  parameters:
+                    - '//Object[@Type=''Veeam.Backup.Core.CBackupSession'']/Property[@Name=''JobId'' and text()=''{#BACKUPJOBID}'']/following-sibling::Property[@Name=''Result'']/text()'
+                - type: STR_REPLACE
+                  parameters:
+                    - Success
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - Warning
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - Failed
+                    - '3'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'Not readable'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - Running
+                    - '4'
+              master_item:
+                key: veeam.jobs
+              tags:
+                - tag: Application
+                  value: Veeam
+              trigger_prototypes:
+                - uuid: f735c9d6e8354b31b9d8c2a9d0170788
+                  expression: 'last(/Template AC Veeam/veeam.job.status)=3'
+                  name: 'Failed state backup job - {#BACKUPJOBNAME}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                - uuid: 411bf1f476c44cf595b1f5c486a7be40
+                  expression: 'last(/Template AC Veeam/veeam.job.status)=2'
+                  name: 'Warning state backup job - {#BACKUPJOBNAME}'
+                  priority: WARNING
+                  manual_close: 'YES'
+        - uuid: dd5bef03b1fb4c6d8ded1e36ccc61f85
+          name: 'Discovery Veeam Repositories'
+          key: veeam.repositoryDiscovery
+          delay: 1h
+          lifetime: 7d
+          item_prototypes:
+            - uuid: 1249d2942ad14ee0babdac2018f06f8c
+              name: 'Veeam repository {#REPOSITORYNAME} - % free space'
+              type: CALCULATED
+              key: 'veeam.repository.freePercentSpace[{#REPOSITORYNAME}]'
+              value_type: FLOAT
+              units: '%'
+              params: '100*last(//veeam.repository.freeSpace[{#REPOSITORYNAME}])/last(//veeam.repository.totalSpace[{#REPOSITORYNAME}])'
+              tags:
+                - tag: Application
+                  value: Veeam
+              trigger_prototypes:
+                - uuid: df3bdd7a75a948eeab8ffe61eb73e2b5
+                  expression: 'last(/Template AC Veeam/veeam.repository.freePercentSpace[{#REPOSITORYNAME}])<{$REPOSITORYFREESPACEPERCENT}'
+                  name: '% Low free space {#REPOSITORYNAME} - less {$REPOSITORYFREESPACEPERCENT}'
+                  priority: WARNING
+            - uuid: 5a834c075f8c4c82983d7cfa19631c97
+              name: 'Veeam repository {#REPOSITORYNAME} - free space'
+              type: DEPENDENT
+              key: 'veeam.repository.freeSpace[{#REPOSITORYNAME}]'
+              delay: '0'
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $..REPOSITORYFREESPACE
+                - type: STR_REPLACE
+                  parameters:
+                    - '["'
+                    - ''
+                - type: STR_REPLACE
+                  parameters:
+                    - '"]'
+                    - ''
+              master_item:
+                key: 'veeam.repositoryStatus["{#REPOSITORYID}"]'
+              tags:
+                - tag: Application
+                  value: Veeam
+              trigger_prototypes:
+                - uuid: 9f0a84479b8a4300a6aacd190b1a72fd
+                  expression: 'last(/Template AC Veeam/veeam.repository.freeSpace[{#REPOSITORYNAME}])<"{$REPOSITORYFREESPACEGB}*1024*1024*1024"'
+                  name: 'Low free space {#REPOSITORYNAME} - less {$REPOSITORYFREESPACEGB}'
+                  priority: WARNING
+            - uuid: 4e578e64f36248648026b676781aca54
+              name: 'Veeam repository {#REPOSITORYNAME} - total space'
+              type: DEPENDENT
+              key: 'veeam.repository.totalSpace[{#REPOSITORYNAME}]'
+              delay: '0'
+              units: B
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $..REPOSITORYSIZE
+                - type: STR_REPLACE
+                  parameters:
+                    - '["'
+                    - ''
+                - type: STR_REPLACE
+                  parameters:
+                    - '"]'
+                    - ''
+              master_item:
+                key: 'veeam.repositoryStatus["{#REPOSITORYID}"]'
+              tags:
+                - tag: Application
+                  value: Veeam
+            - uuid: 830563bee2e6499cb41776fb5d4d30e9
+              name: 'Veeam repository {#REPOSITORYNAME} - raw'
+              key: 'veeam.repositoryStatus["{#REPOSITORYID}"]'
+              history: '0'
+              trends: '0'
+              value_type: TEXT
+              tags:
+                - tag: Application
+                  value: Veeam
+      macros:
+        - macro: '{$REPOSITORYFREESPACEGB}'
+          value: '1'
+          description: 'GB free space warning'
+        - macro: '{$REPOSITORYFREESPACEPERCENT}'
+          value: '5'
+          description: '% free space warning'
+      valuemaps:
+        - uuid: 4a1a9479b63b45af8bbffd0d058efca0
+          name: 'Veeam Job status'
+          mappings:
+            - value: '0'
+              newvalue: 'Not readable'
+            - value: '1'
+              newvalue: Success
+            - value: '2'
+              newvalue: Warning
+            - value: '3'
+              newvalue: Failed
+            - value: '4'
+              newvalue: Running
