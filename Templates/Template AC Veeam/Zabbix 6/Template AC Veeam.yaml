@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-10-07T12:34:30Z'
+  date: '2024-10-08T06:46:11Z'
   groups:
     - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
       name: Templates/Applications
@@ -34,7 +34,7 @@ zabbix_export:
             - uuid: bd82f417ccbe4390a97a1f93f496f43c
               name: 'Last run {#BACKUPJOBNAME}'
               type: DEPENDENT
-              key: veeam.job.lastrun
+              key: 'veeam.job.lastrun[{#BACKUPJOBID}]'
               delay: '0'
               history: 30d
               trends: '0'
@@ -52,7 +52,7 @@ zabbix_export:
             - uuid: 554c75d36d4b403381a6c26589db659f
               name: 'Status {#BACKUPJOBNAME}'
               type: DEPENDENT
-              key: veeam.job.status
+              key: 'veeam.job.status[{#BACKUPJOBID}]'
               delay: '0'
               history: 30d
               description: '{#BACKUPJOBDESCRIPTION}'
@@ -89,12 +89,12 @@ zabbix_export:
                   value: Veeam
               trigger_prototypes:
                 - uuid: f735c9d6e8354b31b9d8c2a9d0170788
-                  expression: 'last(/Template AC Veeam/veeam.job.status)=3'
+                  expression: 'last(/Template AC Veeam/veeam.job.status[{#BACKUPJOBID}])=3'
                   name: 'Failed state backup job - {#BACKUPJOBNAME}'
                   priority: AVERAGE
                   manual_close: 'YES'
                 - uuid: 411bf1f476c44cf595b1f5c486a7be40
-                  expression: 'last(/Template AC Veeam/veeam.job.status)=2'
+                  expression: 'last(/Template AC Veeam/veeam.job.status[{#BACKUPJOBID}])=2'
                   name: 'Warning state backup job - {#BACKUPJOBNAME}'
                   priority: WARNING
                   manual_close: 'YES'
