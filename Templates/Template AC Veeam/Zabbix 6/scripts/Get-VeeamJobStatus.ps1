@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Read information about jobs
     - History
@@ -20,7 +20,7 @@
 )
 
 
-# inicialization
+# inicialization
 Set-StrictMode -Version latest
 $global:ErrorActionPreference = 'Stop'
 $Error.Clear()
@@ -32,7 +32,7 @@ $Error.Clear()
 Write-Verbose "[info]; Load VeeamPSSnapin"
 Try 
 {
-    $module = Import-Module Veeam.Backup.PowerShell -ErrorAction stop -Verbose:$false 3> $null
+    $module = Import-Module Veeam.Backup.PowerShell -ErrorAction stop -Verbose:$false 3> $null 
 } 
 Catch 
 {
@@ -52,7 +52,7 @@ If ($attrDiscovery)
     Write-Verbose "[info]; Get Veeam jobs"
     Try 
     {
-        $jobs = Get-VBRJob
+        $jobs = Get-VBRJob -WarningAction Ignore
         #$jobs = [Veeam.Backup.Core.CBackupJob]::GetAll()
     } 
     Catch 
@@ -81,7 +81,7 @@ Else
 {
 
     Try {
-        $lastSession = (Get-VBRJob).findLastSession()
+        $lastSession = (Get-VBRJob -WarningAction Ignore).findLastSession()
         $returnJSOn = ($lastSession | ConvertTo-Xml | select OuterXml).OuterXml 
     }
     Catch {
